@@ -19,7 +19,7 @@
 
 import itertools as it
 
-MAX_QUEENS = 9
+MAX_QUEENS = 10
 while True:
 		nQueens = int(input("How many queens? "))
 		if nQueens > MAX_QUEENS:
@@ -50,9 +50,10 @@ def get_all_queens():
 def get_good_queens():
 	good = 0
 	for queen in range(len(allQueens)):
-		if ( fitness(allQueens[queen]) == MAX_FIT ):
+		fit = fitness(allQueens[queen])
+		if ( fit == MAX_FIT ):
 			good += 1
-			print("Q", queen, ":", allQueens[queen], "fitness =", fitness(allQueens[queen]) )
+			print("Q", queen, ":", allQueens[queen], "fitness =", fit )
 	print("There are", good, "non-fundamental solutions.")
 
 get_good_queens()
