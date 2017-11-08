@@ -48,9 +48,12 @@ def get_all_queens():
 		print("queen", queen, ":", allQueens[queen], fitness(allQueens[queen]) )
 
 def get_good_queens():
+	good = 0
 	for queen in range(len(allQueens)):
 		if ( fitness(allQueens[queen]) == MAX_FIT ):
+			good += 1
 			print("Q", queen, ":", allQueens[queen], "fitness =", fitness(allQueens[queen]) )
+	print("There are", good, "non-fundamental solutions.")
 
 get_good_queens()
 
