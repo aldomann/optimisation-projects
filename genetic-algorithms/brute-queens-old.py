@@ -18,14 +18,14 @@
 #	along with this script. If not, see <http://www.gnu.org/licenses/>.
 
 import itertools as it
-import sys
 
 MAX_QUEENS = 10
-nQueens = int(sys.argv[1])
-
-if nQueens > MAX_QUEENS:
-	print("That's too much, man!")
-	exit()
+while True:
+		nQueens = int(input("How many queens? "))
+		if nQueens > MAX_QUEENS:
+				print("That's too much, man! \n")
+				continue
+		else: break
 
 MAX_FIT = nQueens * (nQueens - 1)
 
