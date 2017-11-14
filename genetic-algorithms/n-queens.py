@@ -29,7 +29,8 @@ if N_QUEENS > MAX_QUEENS:
 	exit()
 
 MAX_FIT = N_QUEENS * (N_QUEENS - 1)
-MUTATE = 0.000001
+# MUTATE = 0.000001
+MUTATE = 0.1
 MUTATE_FLAG = True
 MAX_ITER = 100000
 POPULATION = int(sys.argv[2])
@@ -53,7 +54,7 @@ def generate_chromosome():
 	np.random.shuffle(init_distribution)
 	return init_distribution
 
-def fitness(chromosome = None):
+def assess_fitness(chromosome = None):
 	clashes = 0
 	# Calculate diagonal clashes
 	for i in range(len(chromosome)):
@@ -70,8 +71,7 @@ def generate_population(population_size = 100):
 	population = [BoardPermutation() for i in range(population_size)]
 	for i in range(population_size):
 		population[i].set_sequence(generate_chromosome())
-		population[i].set_fitness(fitness(population[i].sequence))
-
+		population[i].set_fitness(assess_fitness(population[i].sequence))
 	return population
 
 def get_parent(population):
@@ -84,11 +84,23 @@ def get_parent(population):
 			best_board = next_board
 	return best_board
 
+def mutate(board):
+	# Mutate a board using a mask
+	# TODO: implement MUTATE_FLAG in main algorithm
+	if random.random() < MUTATE :
+		a, b = random.randint(0, N_QUEENS - 1), random.randint(0, N_QUEENS - 1)
+		while (b == a): # To ensure a true mutation
+			b = random.randint(0, N_QUEENS - 1)
+		population[board].sequence[a], population[board].sequence[b] = population[board].sequence[b], population[board].sequence[a]
+		# print("CANCER!", a, "<->", b)
+	# else:
+		# print("No mutation :)")
+
 ################################################################
 
 def stop_condition():
 	# It stops the GA when a solution is found
-	# TODO: implement this in the main algorithm
+	# TODO: implement this in main algorithm
 	fitnessvals = [pos.fitness for pos in population]
 	if MAX_FIT in fitnessvals:
 		return True
@@ -123,3 +135,10 @@ population = generate_population(POPULATION)
 find_good_queen(population)
 
 # get_parent(population)
+
+
+# for board in range(len(population)):
+# 	print(population[board].sequence)
+# 	mutate(board)
+# 	print(population[board].sequence)
+# 	print()
