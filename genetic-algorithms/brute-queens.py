@@ -44,7 +44,7 @@ class BoardPermutation:
 		return { 'sequence' : sequence, 'fitness' : fitness }
 
 
-def fitness(chromosome = None):
+def assess_fitness(chromosome = None):
 	clashes = 0
 	# Calculate diagonal clashes
 	for i in range(len(chromosome)):
@@ -63,8 +63,7 @@ def generate_full_population():
 	population = [BoardPermutation() for i in range(population_size)]
 	for i in range(population_size):
 		population[i].set_sequence(allPerms[i])
-		population[i].set_fitness(fitness(population[i].sequence))
-
+		population[i].set_fitness(assess_fitness(population[i].sequence))
 	return population
 
 def get_good_queens(population = None):
