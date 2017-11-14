@@ -19,6 +19,7 @@
 
 import numpy as np
 import sys
+import random
 
 MAX_QUEENS = 10
 nQueens = int(sys.argv[1])
@@ -27,13 +28,12 @@ if nQueens > MAX_QUEENS:
 	print("That's too much, man!")
 	exit()
 
-POP_SIZE = int(sys.argv[2])
-
 MAX_FIT = nQueens * (nQueens - 1)
 MUTATE = 0.000001
 MUTATE_FLAG = True
 MAX_ITER = 100000
-POPULATION = None
+POPULATION = int(sys.argv[2])
+
 
 class BoardPermutation:
 	def __init__(self):
@@ -45,6 +45,7 @@ class BoardPermutation:
 		self.fitness = fitness
 	def getAttr(self):
 		return { 'sequence':sequence, 'fitness':fitness }
+
 
 def generateChromosome():
 	# Randomly generates a sequence of board states.
@@ -65,7 +66,6 @@ def fitness(chromosome = None):
 	return (MAX_FIT - clashes)
 
 def generatePopulation(population_size = 100):
-	POPULATION = population_size
 	# Create the different boards
 	population = [BoardPermutation() for i in range(population_size)]
 	for i in range(population_size):
@@ -73,6 +73,28 @@ def generatePopulation(population_size = 100):
 		population[i].setFitness(fitness(population[i].sequence))
 
 	return population
+
+def getParent(population):
+	# Get parent using a Tournament Selection algorithm
+	best_board = random.randint(0, len(population) - 1)
+	tournament_size = 3
+	for i in range(2,tournament_size):
+		next_board = random.randint(0, len(population) - 1)
+		if ( population[next_board].fitness > population[best_board].fitness ):
+			best_board = next_board
+	return best_board
+
+################################################################
+
+def stopCondition():
+	# It stops the GA when a solution is found
+	# TODO: implement this in the main algorithm
+	fitnessvals = [pos.fitness for pos in population]
+	if MAX_FIT in fitnessvals:
+		return True
+	if MAX_ITER == iteration:
+		return True
+	return False
 
 ################################################################
 
@@ -96,6 +118,8 @@ def find_good_queen(population = None):
 		print("Couldn't find any solution.")
 
 
-population = generatePopulation(POP_SIZE)
+population = generatePopulation(POPULATION)
 # get_good_queens(population)
 find_good_queen(population)
+
+# getParent(population)
