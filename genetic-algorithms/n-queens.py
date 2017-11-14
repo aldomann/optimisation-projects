@@ -22,13 +22,13 @@ import sys
 import random
 
 MAX_QUEENS = 10
-nQueens = int(sys.argv[1])
+N_QUEENS = int(sys.argv[1])
 
-if nQueens > MAX_QUEENS:
+if N_QUEENS > MAX_QUEENS:
 	print("That's too much, man!")
 	exit()
 
-MAX_FIT = nQueens * (nQueens - 1)
+MAX_FIT = N_QUEENS * (N_QUEENS - 1)
 MUTATE = 0.000001
 MUTATE_FLAG = True
 MAX_ITER = 100000
@@ -39,17 +39,17 @@ class BoardPermutation:
 	def __init__(self):
 		self.sequence = None
 		self.fitness = None
-	def setSequence(self, val):
+	def set_sequence(self, val):
 		self.sequence = val
-	def setFitness(self, fitness):
+	def set_fitness(self, fitness):
 		self.fitness = fitness
-	def getAttr(self):
-		return { 'sequence':sequence, 'fitness':fitness }
+	def get_attr(self):
+		return { 'sequence' : sequence, 'fitness' : fitness }
 
 
-def generateChromosome():
+def generate_chromosome():
 	# Randomly generates a sequence of board states.
-	init_distribution = np.arange(nQueens)
+	init_distribution = np.arange(N_QUEENS)
 	np.random.shuffle(init_distribution)
 	return init_distribution
 
@@ -65,16 +65,16 @@ def fitness(chromosome = None):
 					clashes += 1
 	return (MAX_FIT - clashes)
 
-def generatePopulation(population_size = 100):
+def generate_population(population_size = 100):
 	# Create the different boards
 	population = [BoardPermutation() for i in range(population_size)]
 	for i in range(population_size):
-		population[i].setSequence(generateChromosome())
-		population[i].setFitness(fitness(population[i].sequence))
+		population[i].set_sequence(generate_chromosome())
+		population[i].set_fitness(fitness(population[i].sequence))
 
 	return population
 
-def getParent(population):
+def get_parent(population):
 	# Get parent using a Tournament Selection algorithm
 	best_board = random.randint(0, len(population) - 1)
 	tournament_size = 3
@@ -86,7 +86,7 @@ def getParent(population):
 
 ################################################################
 
-def stopCondition():
+def stop_condition():
 	# It stops the GA when a solution is found
 	# TODO: implement this in the main algorithm
 	fitnessvals = [pos.fitness for pos in population]
@@ -118,8 +118,8 @@ def find_good_queen(population = None):
 		print("Couldn't find any solution.")
 
 
-population = generatePopulation(POPULATION)
+population = generate_population(POPULATION)
 # get_good_queens(population)
 find_good_queen(population)
 
-# getParent(population)
+# get_parent(population)
