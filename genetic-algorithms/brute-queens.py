@@ -21,6 +21,7 @@ import numpy as np
 import itertools as it
 import sys
 
+
 MAX_QUEENS = 10
 nQueens = int(sys.argv[1])
 
@@ -29,6 +30,7 @@ if nQueens > MAX_QUEENS:
 	exit()
 
 MAX_FIT = nQueens * (nQueens - 1)
+
 
 class BoardPermutation:
 	def __init__(self):
@@ -40,6 +42,7 @@ class BoardPermutation:
 		self.fitness = fitness
 	def getAttr(self):
 		return { 'sequence' : sequence, 'fitness' : fitness }
+
 
 def fitness(chromosome = None):
 	clashes = 0
@@ -64,13 +67,8 @@ def generateFullPopulation():
 
 	return population
 
-################################################################
-
-# def get_all_queens():
-# 	for queen in range(len(allQueens)):
-# 		print("queen", queen, ":", allQueens[queen], fitness(allQueens[queen]) )
-
 def get_good_queens(population = None):
+	# Print all solutions
 	good = 0
 	for board in range(len(population)):
 		if ( population[board].fitness == MAX_FIT ):
@@ -78,7 +76,6 @@ def get_good_queens(population = None):
 				print( "Q",  board, ":", population[board].sequence, "fitness:", population[board].fitness )
 	print("There are", good, "non-fundamental solutions.")
 
-################################################################
 
 population = generateFullPopulation()
 get_good_queens(population)
