@@ -23,24 +23,24 @@ import sys
 
 
 MAX_QUEENS = 10
-nQueens = int(sys.argv[1])
+N_QUEENS = int(sys.argv[1])
 
-if nQueens > MAX_QUEENS:
+if N_QUEENS > MAX_QUEENS:
 	print("That's too much, man!")
 	exit()
 
-MAX_FIT = nQueens * (nQueens - 1)
+MAX_FIT = N_QUEENS * (N_QUEENS - 1)
 
 
 class BoardPermutation:
 	def __init__(self):
 		self.sequence = None
 		self.fitness = None
-	def setSequence(self, val):
+	def set_sequence(self, val):
 		self.sequence = val
-	def setFitness(self, fitness):
+	def set_fitness(self, fitness):
 		self.fitness = fitness
-	def getAttr(self):
+	def get_attr(self):
 		return { 'sequence' : sequence, 'fitness' : fitness }
 
 
@@ -56,14 +56,14 @@ def fitness(chromosome = None):
 					clashes += 1
 	return (MAX_FIT - clashes)
 
-def generateFullPopulation():
+def generate_full_population():
 	# Create all the boards
-	allPerms = list( it.permutations(range(nQueens)) )
+	allPerms = list( it.permutations(range(N_QUEENS)) )
 	population_size = len(allPerms)
 	population = [BoardPermutation() for i in range(population_size)]
 	for i in range(population_size):
-		population[i].setSequence(allPerms[i])
-		population[i].setFitness(fitness(population[i].sequence))
+		population[i].set_sequence(allPerms[i])
+		population[i].set_fitness(fitness(population[i].sequence))
 
 	return population
 
@@ -77,7 +77,7 @@ def get_good_queens(population = None):
 	print("There are", good, "non-fundamental solutions.")
 
 
-population = generateFullPopulation()
+population = generate_full_population()
 get_good_queens(population)
 
 
