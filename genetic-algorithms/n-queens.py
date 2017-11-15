@@ -96,6 +96,47 @@ def mutate(board):
 	# else:
 		# print("No mutation :)")
 
+def pmx_crossover(board_a, board_b):
+	# Choose crossover points
+	cx1 = random.randint(0, N_QUEENS - 1)
+	cx2 = random.randint(0, N_QUEENS - 1)
+	if cx1 > cx2: # Swap the two cx points
+		print ("swapping")
+		cx1, cx2 = cx2, cx1
+	print("cx1:", cx1, "cx2:", cx2)
+	# Apply crossover
+	temp_a = []
+	temp_b = []
+	for i in range(cx1, cx2 + 1):
+		# Keep track of the selected values
+		temp_a.append(board_a[i])
+		temp_b.append(board_b[i])
+
+	for i in range(len(temp_a)):
+		print(temp_a[i], "<->",temp_b[i])
+		# Swap values on board_a
+		board_a[board_a.tolist().index(temp_a[i])], \
+		board_a[board_a.tolist().index(temp_b[i])] = \
+		board_a[board_a.tolist().index(temp_b[i])], \
+		board_a[board_a.tolist().index(temp_a[i])]
+		# Swap values on board_b
+		board_b[board_b.tolist().index(temp_a[i])], \
+		board_b[board_b.tolist().index(temp_b[i])] = \
+		board_b[board_b.tolist().index(temp_b[i])], \
+		board_b[board_b.tolist().index(temp_a[i])]
+
+def uniform_crossover(board_a, board_b, prob=0.1):
+	# Swap individual indexes with probability prob
+	for i in range(N_QUEENS):
+		if random.random() < prob:
+			print(i)
+			board_a[i], board_b[i] = board_b[i], board_a[i]
+
+def ux_mask_crossover(board_a, board_b):
+	# Fancy stuff
+	pass
+
+
 ################################################################
 
 def stop_condition():
@@ -129,10 +170,18 @@ def find_good_queen(population = None):
 	if ( good == False ):
 		print("Couldn't find any solution.")
 
+################################################################
 
 population = generate_population(POPULATION)
 # get_good_queens(population)
 find_good_queen(population)
+
+print(population[1].sequence)
+print(population[2].sequence)
+# pmx_crossover(population[1].sequence, population[2].sequence)
+uniform_crossover(population[1].sequence, population[2].sequence)
+print(population[1].sequence)
+print(population[2].sequence)
 
 # get_parent(population)
 
