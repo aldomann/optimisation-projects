@@ -132,9 +132,34 @@ def uniform_crossover(board_a, board_b, prob=0.1):
 			print(i)
 			board_a[i], board_b[i] = board_b[i], board_a[i]
 
-def ux_mask_crossover(board_a, board_b):
-	# Fancy stuff
-	pass
+def ordered_crossover(ind1, ind2):
+	size = N_QUEENS
+	a, b = random.sample(range(size), 2)
+	if a > b:
+			a, b = b, a
+	print(a,b)
+
+	holes1, holes2 = [True]*size, [True]*size
+	for i in range(size):
+		if i < a or i > b:
+			holes1[ind2[i]] = False
+			holes2[ind1[i]] = False
+
+	temp1, temp2 = ind1, ind2
+	k1 , k2 = b + 1, b + 1
+	for i in range(size):
+		if not holes1[temp1[(i + b + 1) % size]]:
+			ind1[k1 % size] = temp1[(i + b + 1) % size]
+			k1 += 1
+
+		if not holes2[temp2[(i + b + 1) % size]]:
+			ind2[k2 % size] = temp2[(i + b + 1) % size]
+			k2 += 1
+
+	for i in range(a, b + 1):
+		ind1[i], ind2[i] = ind2[i], ind1[i]
+
+	return ind1, ind2
 
 
 ################################################################
@@ -176,18 +201,18 @@ population = generate_population(POPULATION)
 # get_good_queens(population)
 find_good_queen(population)
 
-print(population[1].sequence)
-print(population[2].sequence)
-# pmx_crossover(population[1].sequence, population[2].sequence)
-uniform_crossover(population[1].sequence, population[2].sequence)
-print(population[1].sequence)
-print(population[2].sequence)
-
 # get_parent(population)
-
 
 # for board in range(len(population)):
 # 	print(population[board].sequence)
 # 	mutate(board)
 # 	print(population[board].sequence)
 # 	print()
+
+print(population[1].sequence)
+print(population[2].sequence)
+# pmx_crossover(population[1].sequence, population[2].sequence)
+# uniform_crossover(population[1].sequence, population[2].sequence)
+ordered_crossover(population[1].sequence, population[2].sequence)
+print(population[1].sequence)
+print(population[2].sequence)
