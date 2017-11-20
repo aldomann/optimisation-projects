@@ -24,18 +24,19 @@ queens.plot <- ggplot(queens.df, aes(x = as.factor(n))) +
 	labs(title =  "Comparison of brute force complexity for the N queens problem",
 			 x = "Board size (N)", y = "Count", fill = "Type")
 
+queens.plot
+
 # Second method (dodge)
 library(reshape2)
 queens.df2 <- melt(data.frame(cbind(n,all,perms,sols)),id.vars = 1)
 
 queens.plot.dodge <- ggplot(queens.df2, aes(x = as.factor(n), y = value)) +
-	geom_bar(aes(fill = variable),stat = "identity",position = "dodge") +
+	geom_bar(aes(fill = variable), colour = "black", size = 0.25,
+					 stat = "identity",position = "dodge") +
 	scale_fill_manual(values = c("all" = "brown1", "perms" = "slateblue", "sols" = "limegreen")) +
 	scale_y_log10() +
-	labs(title =  "Comparison of brute force complexity for the N queens problem",
-			 x = "Board size (N)", y = "Count", fill = "Type")
+	labs(#title =  "Comparison of brute force complexity for the N queens problem",
+			 x = "Board size (N)", y = "Count", fill = "Type") +
+	theme()
 
-
-queens.plot + theme(text = element_text(family = "LM Roman 10")) + ggsave(filename = "queens-sols-alt.pdf", width = 5.75, height = 3.75, dpi = 96, device = cairo_pdf)
-
-queens.plot.dodge + theme(text = element_text(family = "LM Roman 10")) + ggsave(filename = "queens-sols.pdf", width = 5.75, height = 3.75, dpi = 96, device = cairo_pdf)
+queens.plot.dodge + theme_bw() + theme(text = element_text(family = "LM Roman 10")) + ggsave(filename = "queens-sols.pdf", width = 6, height = 3, dpi = 96, device = cairo_pdf)
