@@ -73,7 +73,7 @@ def generate_population(population_size = 100):
 		population[i].set_fitness(assess_fitness(population[i].sequence))
 	return population
 
-def get_parent(population):
+def get_parent(population = None):
 	# Get parent using a Tournament Selection algorithm
 	best_board = random.randint(0, len(population) - 1)
 	tournament_size = 3
@@ -83,7 +83,7 @@ def get_parent(population):
 			best_board = next_board
 	return best_board
 
-def mutate(board):
+def mutate(board = None):
 	# Mutate a board using a mask
 	if random.random() < MUTATE :
 		a, b = random.randint(0, N_QUEENS - 1), random.randint(0, N_QUEENS - 1)
@@ -91,7 +91,7 @@ def mutate(board):
 			b = random.randint(0, N_QUEENS - 1)
 		population[board].sequence[a], population[board].sequence[b] = population[board].sequence[b], population[board].sequence[a]
 
-def ordered_crossover(ind1, ind2):
+def ordered_crossover(ind1 = None, ind2 = None):
 	# Ordered crossover
 	a, b = random.sample(range(N_QUEENS), 2)
 	if a > b:
