@@ -21,7 +21,7 @@ import numpy as np
 import sys
 import random
 
-MAX_QUEENS = 15
+MAX_QUEENS = 12
 N_QUEENS = int(sys.argv[1])
 
 if N_QUEENS > MAX_QUEENS:
@@ -76,8 +76,8 @@ def generate_population(population_size = 100):
 def get_parent(population = None):
 	# Get parent using a Tournament Selection algorithm
 	best_board = random.randint(0, len(population) - 1)
-	tournament_size = 3
-	for i in range(2,tournament_size):
+	tournament_size = 2
+	for i in range(1,tournament_size):
 		next_board = random.randint(0, len(population) - 1)
 		if ( population[next_board].fitness > population[best_board].fitness ):
 			best_board = next_board
@@ -86,9 +86,9 @@ def get_parent(population = None):
 def mutate(board = None):
 	# Mutate a board using a mask
 	if random.random() < MUTATE :
-		a, b = random.randint(0, N_QUEENS - 1), random.randint(0, N_QUEENS - 1)
+		a, b = random.sample(range(N_QUEENS), 2)
 		while (b == a): # To ensure a true mutation
-			b = random.randint(0, N_QUEENS - 1)
+			b = random.sample(range(N_QUEENS), 1)
 		population[board].sequence[a], population[board].sequence[b] = population[board].sequence[b], population[board].sequence[a]
 
 def ordered_crossover(ind1 = None, ind2 = None):
@@ -118,23 +118,25 @@ def ordered_crossover(ind1 = None, ind2 = None):
 ################################################################
 
 def find_good_queen(population = None):
-	# Look for a good board (slow as hell)
+	# Look for a good board
 	for board in range(len(population)):
 		if ( population[board].fitness == MAX_FIT ):
 			print("Found a non-fundamental solution.")
 			print( "Q",  board, ":", population[board].sequence, "fitness:", population[board].fitness )
 			return True
 
-def GA(MAX_ITER):
+def genetic_algorithm(MAX_ITER):
 	for iteration in range(MAX_ITER):
 		print(" #"*5 ,"Genetic generation :", iteration, "#"*5)
+		# Select parents
 		parent1 = get_parent(population)
 		parent2 = get_parent(population)
 		ordered_crossover(population[parent1].sequence, population[parent2].sequence)
+		# Mutate children
 		if(MUTATE_FLAG):
 			mutate(parent1)
 			mutate(parent2)
-		# Update fitness
+		# Reassess fitness
 		population[parent1].set_fitness(assess_fitness(population[parent1].sequence))
 		population[parent2].set_fitness(assess_fitness(population[parent2].sequence))
 		if find_good_queen(population):
@@ -144,4 +146,4 @@ def GA(MAX_ITER):
 
 population = generate_population(POPULATION)
 good = False
-GA(MAX_ITER)
+genetic_algorithm(MAX_ITER)
