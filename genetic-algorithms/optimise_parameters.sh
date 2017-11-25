@@ -5,18 +5,18 @@
 
 
 # Python and its libraries are provided by Anaconda 3
-anacondainit
+# anacondainit
 
 # Looping over N
-for (( N = 8; N <= 10; N ++ )); do
-	# Looping over POPULATION
+for ( N = 8; N <= 10; N ++ ); do
 	echo 'Running the Genetic Algorithm for N =' $N
-	for (( P = 50; P <= 50 * N ; P += 50 )); do
+	# Looping over POPULATION
+	for ( P = 50; P <= 50 * N ; P += 50 ); do
 		# Looping over MUTATE_PROB
-		# for (( M = 5; M <= 10; M ++ )); do
+		# for ( M = 5; M <= 10; M ++ ); do
 		for M in 0.005 0.006 0.007 0.008 0.009 0.01; do
 			# 100 runs for each tuple
-			for (( i = 0; i < 100; i++ )); do
+			for ( i = 0; i < 1; i++ ); do
 				python n-queens.py $N $P $M
 			done
 		done
