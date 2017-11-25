@@ -29,9 +29,9 @@ if N_QUEENS > MAX_QUEENS:
 	exit()
 
 MAX_FIT = N_QUEENS * (N_QUEENS - 1)
-MUTATE_PROB = float(sys.argv[3])
 MUTATE_FLAG = True
-MAX_ITER = 100
+MUTATE_PROB = float(sys.argv[3])
+MAX_ITER = 10000
 POPULATION = int(sys.argv[2])
 
 VERBOSE_FLAG = True
@@ -132,6 +132,7 @@ def find_good_queen(population = None):
 			return True
 
 def genetic_algorithm(MAX_ITER):
+	global good
 	for iteration in range(MAX_ITER):
 		if VERBOSE_FLAG:
 			print(" #"*5 ,"Genetic generation :", iteration, "#"*5)
@@ -152,15 +153,13 @@ def genetic_algorithm(MAX_ITER):
 				with open('results.csv', 'a') as csvfile:
 					writer = csv.writer(csvfile)
 					writer.writerow([N_QUEENS, POPULATION, MUTATE_PROB, iteration])
-			return True
+			good = True
 			break
-		# No solution found
-		else:
-			return False
 
 ################################################################
 
 population = generate_population(POPULATION)
-good = genetic_algorithm(MAX_ITER)
+good = False
+genetic_algorithm(MAX_ITER)
 if VERBOSE_FLAG and not good:
 	print("Couldn't find any solution.")
