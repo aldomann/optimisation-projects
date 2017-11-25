@@ -29,11 +29,16 @@ if N_QUEENS > MAX_QUEENS:
 	exit()
 
 MAX_FIT = N_QUEENS * (N_QUEENS - 1)
-MUTATE = 0.000001
+MUTATE_PROB = float(sys.argv[3])
 MUTATE_FLAG = True
-MAX_ITER = 100000
+MAX_ITER = 100
 POPULATION = int(sys.argv[2])
 
+VERBOSE_FLAG = True
+
+WRITE_FLAG = True
+if (WRITE_FLAG):
+	import csv
 
 class BoardPermutation:
 	def __init__(self):
@@ -85,7 +90,7 @@ def get_parent(population = None):
 
 def mutate(board = None):
 	# Mutate a board using a mask
-	if random.random() < MUTATE :
+	if random.random() < MUTATE_PROB :
 		a, b = random.sample(range(N_QUEENS), 2)
 		while (b == a): # To ensure a true mutation
 			b = random.sample(range(N_QUEENS), 1)
@@ -121,13 +126,15 @@ def find_good_queen(population = None):
 	# Look for a good board
 	for board in range(len(population)):
 		if ( population[board].fitness == MAX_FIT ):
-			print("Found a non-fundamental solution.")
-			print( "Q",  board, ":", population[board].sequence, "fitness:", population[board].fitness )
+			if VERBOSE_FLAG:
+				print("Found a non-fundamental solution.")
+				print( "Q",  board, ":", population[board].sequence, "fitness:", population[board].fitness )
 			return True
 
 def genetic_algorithm(MAX_ITER):
 	for iteration in range(MAX_ITER):
-		print(" #"*5 ,"Genetic generation :", iteration, "#"*5)
+		if VERBOSE_FLAG:
+			print(" #"*5 ,"Genetic generation :", iteration, "#"*5)
 		# Select parents
 		parent1 = get_parent(population)
 		parent2 = get_parent(population)
@@ -139,11 +146,21 @@ def genetic_algorithm(MAX_ITER):
 		# Reassess fitness
 		population[parent1].set_fitness(assess_fitness(population[parent1].sequence))
 		population[parent2].set_fitness(assess_fitness(population[parent2].sequence))
+		# Stop the algorithm
 		if find_good_queen(population):
+			if(WRITE_FLAG):
+				with open('results.csv', 'a') as csvfile:
+					writer = csv.writer(csvfile)
+					writer.writerow([N_QUEENS, POPULATION, MUTATE_PROB, iteration])
+			return True
 			break
+		# No solution found
+		else:
+			return False
 
 ################################################################
 
 population = generate_population(POPULATION)
-good = False
-genetic_algorithm(MAX_ITER)
+good = genetic_algorithm(MAX_ITER)
+if VERBOSE_FLAG and not good:
+	print("Couldn't find any solution.")
