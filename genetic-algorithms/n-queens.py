@@ -135,7 +135,7 @@ def genetic_algorithm(MAX_ITER):
 	global good
 	for iteration in range(MAX_ITER):
 		if VERBOSE_FLAG:
-			print(" #"*5 ,"Genetic generation :", iteration, "#"*5)
+			print("#"*5 ,"Genetic generation :", iteration, "#"*5)
 		# Select parents
 		parent1 = get_parent(population)
 		parent2 = get_parent(population)
