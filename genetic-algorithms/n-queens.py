@@ -29,6 +29,7 @@ if N_QUEENS > MAX_QUEENS:
 	exit()
 
 MAX_FIT = N_QUEENS * (N_QUEENS - 1)
+TOURN_SIZE = int(sys.argv[4])
 MUTATE_FLAG = True
 MUTATE_PROB = float(sys.argv[3])
 MAX_ITER = 10000
@@ -36,7 +37,7 @@ POPULATION = int(sys.argv[2])
 
 VERBOSE_FLAG = True
 
-WRITE_FLAG = True
+WRITE_FLAG = False
 if (WRITE_FLAG):
 	import csv
 
@@ -81,8 +82,7 @@ def generate_population(population_size = 100):
 def get_parent(population = None):
 	# Get parent using a Tournament Selection algorithm
 	best_board = random.randint(0, len(population) - 1)
-	tournament_size = 2
-	for i in range(1,tournament_size):
+	for i in range(1,TOURN_SIZE):
 		next_board = random.randint(0, len(population) - 1)
 		if ( population[next_board].fitness > population[best_board].fitness ):
 			best_board = next_board
@@ -152,7 +152,7 @@ def genetic_algorithm(MAX_ITER):
 			if(WRITE_FLAG):
 				with open('results.csv', 'a') as csvfile:
 					writer = csv.writer(csvfile)
-					writer.writerow([N_QUEENS, POPULATION, MUTATE_PROB, iteration])
+					writer.writerow([N_QUEENS, POPULATION, MUTATE_PROB, TOURN_SIZE, iteration])
 			good = True
 			break
 
