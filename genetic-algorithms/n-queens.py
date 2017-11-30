@@ -161,4 +161,4 @@ population = generate_population(POPULATION)
 good = False
 genetic_algorithm(MAX_ITER)
 if VERBOSE_FLAG and not good:
-	print("Couldn't find any solution.")
+	print("Couldn't find any solution in", MAX_ITER, "generations.")
