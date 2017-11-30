@@ -21,7 +21,7 @@ import numpy as np
 import sys
 import random
 
-MAX_QUEENS = 12
+MAX_QUEENS = 20
 N_QUEENS = int(sys.argv[1])
 
 if N_QUEENS > MAX_QUEENS:
@@ -128,15 +128,14 @@ def find_good_queen(population = None):
 	for board in range(len(population)):
 		if ( population[board].fitness == MAX_FIT ):
 			if VERBOSE_FLAG:
-				print("Found a non-fundamental solution.")
+				print("Found a non-fundamental solution on generation", iteration)
 				print( "Q",  board, ":", population[board].sequence, "fitness:", population[board].fitness )
 			good = True
 			return True
 
 def genetic_algorithm(MAX_ITER):
+	global iteration
 	for iteration in range(MAX_ITER):
-		if VERBOSE_FLAG:
-			print("#"*5 ,"Genetic generation :", iteration, "#"*5)
 		# Select parents
 		parent1 = get_parent(population)
 		parent2 = get_parent(population)
