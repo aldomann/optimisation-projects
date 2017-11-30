@@ -123,16 +123,17 @@ def ordered_crossover(ind1 = None, ind2 = None):
 ################################################################
 
 def find_good_queen(population = None):
+	global good
 	# Look for a good board
 	for board in range(len(population)):
 		if ( population[board].fitness == MAX_FIT ):
 			if VERBOSE_FLAG:
 				print("Found a non-fundamental solution.")
 				print( "Q",  board, ":", population[board].sequence, "fitness:", population[board].fitness )
+			good = True
 			return True
 
 def genetic_algorithm(MAX_ITER):
-	global good
 	for iteration in range(MAX_ITER):
 		if VERBOSE_FLAG:
 			print("#"*5 ,"Genetic generation :", iteration, "#"*5)
@@ -153,7 +154,6 @@ def genetic_algorithm(MAX_ITER):
 				with open('results.csv', 'a') as csvfile:
 					writer = csv.writer(csvfile)
 					writer.writerow([N_QUEENS, POPULATION, MUTATE_PROB, TOURN_SIZE, iteration])
-			good = True
 			break
 
 ################################################################
