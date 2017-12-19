@@ -21,7 +21,7 @@ BEGIN{
 }
 FNR > 3 {
 	if ($1 == "way") {
-		printf("%s,%s", $2, $8);
+		printf("%s,%s,", $2, $8);
 		for(i=10; i<=NF; ++i) printf("%s,", $i);
 		printf("\n")
 	}
