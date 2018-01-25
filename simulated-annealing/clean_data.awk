@@ -20,6 +20,6 @@ BEGIN{
 	FS = " "
 	OFS = ","
 }
-NR > 2 {
+NR > 1 && NF == 2 {
 	print $1, $2
 }
