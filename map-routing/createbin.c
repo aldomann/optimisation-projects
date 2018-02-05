@@ -22,15 +22,15 @@
 #include <limits.h>
 
 typedef struct {
-	unsigned long id; // Node identification
+	unsigned long id;     // Node identification
 	unsigned short namelen;
 	char *name;
-	double lat, lon; // Node position
-	unsigned short nsucc; // Number of node successors; i. e. length of successors
+	double lat, lon;      // Node position
+	unsigned short nsucc; // Node successors: wighted edges
 	unsigned long *successors;
-} node;
+} Node;
 
-unsigned long BinarySearch(unsigned long key, node *nodes, unsigned long lenlist) {
+unsigned long perform_binary_search(unsigned long key, Node *nodes, unsigned long lenlist) {
 	register unsigned long start = 0UL, afterend = lenlist, middle;
 	register unsigned long try;
 	while ( afterend > start ) {
@@ -39,7 +39,7 @@ unsigned long BinarySearch(unsigned long key, node *nodes, unsigned long lenlist
 		if ( key == try ) {
 			return middle;
 		} else if ( key > try ) {
-			start = middle+1;
+			start = middle + 1;
 		} else {
 			afterend = middle;
 		}
@@ -48,43 +48,43 @@ unsigned long BinarySearch(unsigned long key, node *nodes, unsigned long lenlist
 }
 
 int main(int argc, char* argv[]) {
-
-	int j = 0, n = 0;
+	int j = 0;
+	int n = 0;
 	unsigned long i = 0;
 
-	char *buffer,*field;
+	char *buffer, *field;
 	size_t bufsize = 79857;
 	size_t bytes_read;
 	buffer = (char *)malloc(sizeof(char) * bufsize);
 	field = (char *)malloc(sizeof(char) * 184);
 
-	node *nodes;
+	Node *nodes;
 	unsigned long nnodes = 23895681UL;
-	nodes = (node *) malloc(nnodes*sizeof(node));
+	nodes = (Node *) malloc(nnodes*sizeof(Node));
 	unsigned long *way;
 	way = (unsigned long *)malloc(sizeof(unsigned long) * 5306);
 
 	// READING NODES
 	FILE *file;
 
-	file = fopen("data/spain-nodes.csv","r");
+	file = fopen("data/spain-nodes.csv", "r");
 	printf("Starting to read nodes...\n");
-	while((bytes_read = getline(&buffer,&bufsize,file)) != -1) {
-		field = strsep(&buffer,"|");
-		field = strsep(&buffer,"|");
-		if((nodes[i].id = strtoul(field,'\0',10)) == 0) printf("ERROR: Conversion failed.\n");
-		field = strsep(&buffer,"|");
-		nodes[i].namelen = strlen(field)+1;
+	while((bytes_read = getline(&buffer, &bufsize, file)) != -1) {
+		field = strsep(&buffer, "|");
+		field = strsep(&buffer, "|");
+		if((nodes[i].id = strtoul(field, '\0', 10)) == 0) printf("ERROR: Conversion failed.\n");
+		field = strsep(&buffer, "|");
+		nodes[i].namelen = strlen(field) + 1;
 		nodes[i].name = (char *) malloc(nodes[i].namelen*sizeof(char));
-		strcpy(nodes[i].name,field);
-		field = strsep(&buffer,"|");
+		strcpy(nodes[i].name, field);
+		field = strsep(&buffer, "|");
 		nodes[i].lat = atof(field);
-		field = strsep(&buffer,"|");
+		field = strsep(&buffer, "|");
 		nodes[i].lon = atof(field);
 		i++;
 		if(i % 500000 == 0) {
 			double x = ((100*(double)i)/(double)nnodes);
-			printf("%.2f percent of the nodes have been read.\n",x);
+			printf("%.2f percent of the nodes have been read.\n", x);
 		}
 	}
 
@@ -94,33 +94,34 @@ int main(int argc, char* argv[]) {
 	fclose(file);
 
 	// READING WAYS
-	file = fopen("data/spain-ways.csv","r");
+	file = fopen("data/spain-ways.csv", "r");
 
-	unsigned long a,b,A,B,member,waylen,index;
+	unsigned long a, b, A, B, member, waylen, index;
 	bool oneway;
 
 	for (i = 0; i < nnodes; i++) {
 		if((nodes[i].successors = (unsigned long *)malloc(sizeof(unsigned long)*16)) == NULL) {
-			printf("Memory allocation for the successors failed at node %lu\n",i);
+			printf("Memory allocation for the successors failed at node %lu\n", i);
 			break;
 		}
 	}
+
 	i = 0;
 	printf("\nStarting to read ways...\n");
-	while((bytes_read = getline(&buffer,&bufsize,file)) != -1) {
+	while((bytes_read = getline(&buffer, &bufsize, file)) != -1) {
 		i++;
-		field = strsep(&buffer,"|");
-		field = strsep(&buffer,"|");
-		field = strsep(&buffer,"|");
+		field = strsep(&buffer, "|");
+		field = strsep(&buffer, "|");
+		field = strsep(&buffer, "|");
 		if (strlen(field)>0) {
 			oneway = 1;
 		} else {
 			oneway = 0;
 		}
 
-		while((field = strsep(&buffer,"|")) != NULL) {
-			member = strtoul(field,'\0',10);
-			if((index = BinarySearch(member, nodes, nnodes)) != ULONG_MAX) {
+		while((field = strsep(&buffer, "|")) != NULL) {
+			member = strtoul(field, '\0', 10);
+			if((index = perform_binary_search(member, nodes, nnodes)) != ULONG_MAX) {
 					way[n] = member;
 					n++;
 			}
@@ -130,9 +131,9 @@ int main(int argc, char* argv[]) {
 
 		for (j = 0; j < waylen-1; j++) {
 			A = way[j];
-			a = BinarySearch(A, nodes, nnodes);
-			B = way[j+1];
-			b = BinarySearch(B, nodes, nnodes);
+			a = perform_binary_search(A, nodes, nnodes);
+			B = way[j + 1];
+			b = perform_binary_search(B, nodes, nnodes);
 
 			nodes[a].successors[nodes[a].nsucc] = b;
 			nodes[a].nsucc++;
@@ -145,7 +146,7 @@ int main(int argc, char* argv[]) {
 
 		if(i % 500000 == 0) {
 			double x = ((100*(double)i)/(double)nnodes);
-			printf("%.2f percent of the ways have been read.\n",x);
+			printf("%.2f percent of the ways have been read.\n", x);
 		}
 	}
 
@@ -177,7 +178,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	// Writing all nodes
-	if( fwrite(nodes, sizeof(node), nnodes, file) != nnodes ) {
+	if( fwrite(nodes, sizeof(Node), nnodes, file) != nnodes ) {
 		printf("Error when writing nodes to the output binary data file.\n");
 	}
 
