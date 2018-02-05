@@ -21,18 +21,32 @@
 #	along with this script. If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
+import pandas as pd
+import os
+
+home = os.path.expanduser("~/Code/R/optimisation-projects/simulated-annealing")
+os.chdir(os.path.join(home))
 
 MAX_TEMP = 100
 MAX_ITER = 500000
 
-values, weights = np.genfromtxt('data.dat', delimiter=',').transpose()
+# Old code
+# values, weights = np.genfromtxt('data.dat', delimiter=',').transpose()
+
+# Praise Bill
+data = pd.read_csv('data.dat')
+values = np.array(data["values"])
+weights = np.array(data["weights"])
 
 ind = np.ones(len(values))
 # Gotta decide the shape of these arrays
-inds = np.empty()
-temp = np.empty()
-prob = np.empty()
-solution = np.empty()
+#inds = np.empty(shape = [len(values)], dtype="float64")
+inds = np.empty(0)
+temp = np.empty(0)
+prob = np.empty(0)
+solution = np.empty(0)
+
+inds = np.append(inds, 2)
 
 def get_value(ind, values, weights):
 	a = sum(ind * weights)

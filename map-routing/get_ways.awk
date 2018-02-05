@@ -20,9 +20,9 @@ BEGIN{
 	FS = "|"
 }
 FNR > 3 {
-	if ($1 == "way") {
-		printf("%s,%s,", $2, $8);
-		for(i=10; i<=NF; ++i) printf("%s,", $i);
+	if ($1 == "way" && NF >= 11) {
+		printf("%s|%s|%s", $1, $2, $8);
+		for(i=10; i<=NF; ++i) printf("|%s", $i);
 		printf("\n")
 	}
 }
