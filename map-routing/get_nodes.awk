@@ -1,7 +1,8 @@
 #!/usr/bin/awk -f
 
-# Authors: Alfredo Hernández <aldomann.designs@gmail.com>
-#          Ruth Kristianingsih <ruth.kristianingsih@mathmods.eu>
+# Authors:
+#	Alfredo Hernández <aldomann.designs@gmail.com>
+#	Ruth Kristianingsih <ruth.kristianingsih@mathmods.eu>
 
 # Legal Stuff:
 #	This script is free software: you can redistribute it and/or modify

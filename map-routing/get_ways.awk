@@ -1,7 +1,8 @@
 #!/usr/bin/awk -f
 
-# Authors: Alfredo Hernández <aldomann.designs@gmail.com>
-#          Ruth Kristianingsih <ruth.kristianingsih@mathmods.eu>
+# Authors:
+#	Alfredo Hernández <aldomann.designs@gmail.com>
+#	Ruth Kristianingsih <ruth.kristianingsih@mathmods.eu>
 
 # Legal Stuff:
 #	This script is free software: you can redistribute it and/or modify
@@ -22,7 +23,7 @@ BEGIN{
 FNR > 3 {
 	if ($1 == "way" && NF >= 11) {
 		printf("%s|%s|%s", $1, $2, $8);
-		for(i=10; i<=NF; ++i) printf("|%s", $i);
+		for (i=10; i<=NF; ++i) printf("|%s", $i);
 		printf("\n")
 	}
 }
