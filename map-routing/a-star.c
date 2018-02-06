@@ -51,13 +51,13 @@ typedef struct Node {
 
 // Linked List functions
 void push(NodeT ** head, double f, unsigned long index) {
-	NodeT * new_node;
-	new_node = malloc(sizeof(NodeT));
+	NodeT * node_new;
+	node_new = malloc(sizeof(NodeT));
 
-	new_node->f = f;
-	new_node->index = index;
-	new_node->next = *head;
-	*head = new_node;
+	node_new -> f = f;
+	node_new -> index = index;
+	node_new -> next = *head;
+	*head = node_new;
 }
 
 int remove_first(NodeT ** head) {
@@ -67,7 +67,7 @@ int remove_first(NodeT ** head) {
 		return -1;
 	}
 
-	node_next = (*head)->next;
+	node_next = (*head) -> next;
 	free(*head);
 	*head = node_next;
 	return 1;
@@ -78,38 +78,40 @@ int remove_by_index(NodeT ** head, unsigned long index) {
 	if (current == NULL) {
 		return -1;
 	}
-	NodeT * temp_node = NULL;
+	NodeT * node_temp = NULL;
 
-	if (index == current->index) {
+	if (index == current -> index) {
 		remove_first(head);
 		return 1;
 	}
 
-	while (current->next->index != index) {
-		current = current->next;
+	while (current -> next -> index != index) {
+		current = current -> next;
 		if (current == NULL) return -1;
 	}
 
-	temp_node = current->next;
-	current->next = temp_node->next;
-	free(temp_node);
+	node_temp = current -> next;
+	current -> next = node_temp -> next;
+	free(node_temp);
 	return 1;
 }
 
 unsigned long index_minimum(NodeT * head) {
 	NodeT * current = head;
-	if (current == NULL) return ULONG_MAX;
+	if (current == NULL) {
+		return ULONG_MAX;
+	}
 	NodeT * minimum = NULL;
 	double min = 9999999;
 
 	while (current != NULL) {
-		if (current->f < min) {
+		if (current -> f < min) {
 			minimum = current;
-			min = current->f;
+			min = current -> f;
 		}
-		current = current->next;
+		current = current -> next;
 	}
-	return minimum->index;
+	return minimum -> index;
 }
 
 unsigned long perform_binary_search(unsigned long key, unsigned long *list, unsigned long lenlist) {
