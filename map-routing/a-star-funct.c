@@ -23,6 +23,7 @@
 #include <math.h>
 #include <float.h>
 
+// Structures
 typedef struct {
 	unsigned long id;              // Node identification
 	unsigned short name_lenght;
@@ -33,9 +34,9 @@ typedef struct {
 } Node;
 
 typedef char Queue;
-	enum whichQueue {
-		NONE, OPEN, CLOSED
-	};
+enum whichQueue {
+	NONE, OPEN, CLOSED
+};
 
 typedef struct {
 	double g, h;
@@ -46,13 +47,13 @@ typedef struct {
 typedef struct Node {
 	double f;
 	unsigned long index;
-	struct Node * next;
-} NodeT;
+	struct Node *next;
+} LinkedNode;
 
 // Linked List functions
-void push(NodeT ** head, double f, unsigned long index) {
-	NodeT * node_new;
-	node_new = malloc(sizeof(NodeT));
+void push(LinkedNode **head, double f, unsigned long index) {
+	LinkedNode *node_new;
+	node_new = malloc(sizeof(LinkedNode));
 
 	node_new -> f = f;
 	node_new -> index = index;
@@ -60,8 +61,8 @@ void push(NodeT ** head, double f, unsigned long index) {
 	*head = node_new;
 }
 
-int remove_first(NodeT ** head) {
-	NodeT * node_next = NULL;
+int remove_first(LinkedNode **head) {
+	LinkedNode *node_next = NULL;
 
 	if (*head == NULL) {
 		return -1;
@@ -73,12 +74,12 @@ int remove_first(NodeT ** head) {
 	return 1;
 }
 
-int remove_by_index(NodeT ** head, unsigned long index) {
-	NodeT * current = *head;
+int remove_by_index(LinkedNode **head, unsigned long index) {
+	LinkedNode *current = *head;
 	if (current == NULL) {
 		return -1;
 	}
-	NodeT * node_temp = NULL;
+	LinkedNode *node_temp = NULL;
 
 	if (index == current -> index) {
 		remove_first(head);
@@ -96,12 +97,12 @@ int remove_by_index(NodeT ** head, unsigned long index) {
 	return 1;
 }
 
-unsigned long index_minimum(NodeT * head) {
-	NodeT * current = head;
+unsigned long index_minimum(LinkedNode *head) {
+	LinkedNode *current = head;
 	if (current == NULL) {
 		return ULONG_MAX;
 	}
-	NodeT * minimum = NULL;
+	LinkedNode *minimum = NULL;
 	double min = 9999999;
 
 	while (current != NULL) {
@@ -114,6 +115,7 @@ unsigned long index_minimum(NodeT * head) {
 	return minimum -> index;
 }
 
+// Binary Search function
 unsigned long perform_binary_search(unsigned long key, unsigned long *list, unsigned long lenlist) {
 	register unsigned long start = 0UL, afterend = lenlist, middle;
 	register unsigned long try;
@@ -130,7 +132,8 @@ unsigned long perform_binary_search(unsigned long key, unsigned long *list, unsi
 	return ULONG_MAX;
 }
 
-double distance (Node * nodes, unsigned long node_start, unsigned long node_goal) {
+// Haversine Distance function
+double distance (Node *nodes, unsigned long node_start, unsigned long node_goal) {
 	double R = 6371000;
 	double lat1 = nodes[node_start].lat*(M_PI/180);
 	double lat2 = nodes[node_goal].lat*(M_PI/180);
@@ -143,7 +146,31 @@ double distance (Node * nodes, unsigned long node_start, unsigned long node_goal
 	return R * c;
 }
 
-void astar_algorithm (Node * nodes, NodeT * open_list, AStarStatus * status, unsigned long node_start, unsigned long node_goal, unsigned long nnodes ) {
+// Function to print path
+void print_path (Node *nodes, AStarStatus *status, unsigned long node_start, unsigned long node_goal, unsigned long node_current, unsigned long nnodes) {
+	// Print the path
+	unsigned long *path;
+	unsigned long node_next;
+	int i = 0;
+
+	node_next = node_current;
+	path = (unsigned long *)malloc(nnodes*sizeof(unsigned long));
+	path[0] = node_next;
+	while (node_next != node_start) {
+		i++;
+		node_next = status[node_next].parent;
+		path[i] = node_next;
+	}
+	int path_length = i + 1;
+
+	for (i = path_length-1; i >= 0;i--) {
+		// printf("Node id: %lu, Distance: %.2f m, Name: %s\n", nodes[path[i]].id, status[path[i]].g, nodes[path[i]].name);
+		printf("Node ID: %lu, Distance: %.2f m\n", nodes[path[i]].id, status[path[i]].g);
+	}
+}
+
+// A* Algorithm
+void astar_algorithm (Node *nodes, LinkedNode *open_list, AStarStatus *status, unsigned long node_start, unsigned long node_goal, unsigned long nnodes ) {
 	double successor_current_cost;
 	unsigned long node_current;
 
@@ -186,33 +213,19 @@ void astar_algorithm (Node * nodes, NodeT * open_list, AStarStatus * status, uns
 		printf("OPEN list is empty.\n");
 	}
 
-	// Print the path
-	unsigned long * path;
-	unsigned long node_next;
-	i = 0;
-	node_next = node_current;
-	path = (unsigned long *)malloc(nnodes*sizeof(unsigned long));
-	path[0] = node_next;
-	while (node_next != node_start) {
-		i++;
-		node_next = status[node_next].parent;
-		path[i] = node_next;
-	}
-	int path_length = i + 1;
-
-	for (i = path_length-1; i >= 0;i--) {
-		// printf("Node id: %lu, Distance: %.2f m, Name: %s\n", nodes[path[i]].id, status[path[i]].g, nodes[path[i]].name);
-		printf("Node ID: %lu, Distance: %.2f m\n", nodes[path[i]].id, status[path[i]].g);
-	}
+	print_path(nodes, status, node_start, node_goal, node_current, nnodes);
 }
+
 
 int main (int argc, char* argv[]) {
 	int i;
-	unsigned long nnodes, num_total_successors, num_total_name, node_start, node_goal; //, node_current; //, node_successor;
+	unsigned long nnodes, num_total_successors, num_total_name;
+	unsigned long node_start, node_goal;
 	unsigned long *allsuccessors;
 	char *allnames;
 	Node *nodes;
 
+	// Read binary file
 	FILE *fin;
 
 	if ((fin = fopen ("data/spain-data.bin", "r")) == NULL) {
@@ -269,7 +282,7 @@ int main (int argc, char* argv[]) {
 		}
 	}
 
-	NodeT * open_list = NULL;
+	LinkedNode *open_list = NULL;
 
 	if ((node_start = perform_binary_search(240949599, list, nnodes)) == ULONG_MAX) {
 		printf("Node start not found.\n");
@@ -285,5 +298,6 @@ int main (int argc, char* argv[]) {
 	status[node_start].whq = OPEN;
 	push(&open_list, status[node_start].h, node_start);
 
+	// A* Algorithm
 	astar_algorithm(nodes, open_list, status, node_start, node_goal, nnodes);
 }
