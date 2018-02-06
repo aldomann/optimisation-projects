@@ -24,11 +24,11 @@
 #include <float.h>
 
 typedef struct {
-	unsigned long id;     // Node identification
-	unsigned short namelen;
+	unsigned long id;              // Node identification
+	unsigned short name_lenght;
 	char *name;
-	double lat, lon;      // Node position
-	unsigned short nsucc; // Node successors: wighted edges
+	double lat, lon;               // Node position
+	unsigned short num_successors; // Node successors: wighted edges
 	unsigned long *successors;
 } Node;
 
@@ -61,15 +61,15 @@ void push(NodeT ** head, double f, unsigned long index) {
 }
 
 int remove_first(NodeT ** head) {
-	NodeT * next_node = NULL;
+	NodeT * node_next = NULL;
 
 	if (*head == NULL) {
 		return -1;
 	}
 
-	next_node = (*head)->next;
+	node_next = (*head)->next;
 	free(*head);
-	*head = next_node;
+	*head = node_next;
 	return 1;
 }
 
@@ -115,7 +115,7 @@ unsigned long index_minimum(NodeT * head) {
 unsigned long perform_binary_search(unsigned long key, unsigned long *list, unsigned long lenlist) {
 	register unsigned long start = 0UL, afterend = lenlist, middle;
 	register unsigned long try;
-	while (afterend > start) {
+	while ( afterend > start ) {
 		middle = start + ((afterend-start-1)>>1); try = list[middle];
 		if (key == try) {
 			return middle;
@@ -143,7 +143,7 @@ double distance (Node * nodes, unsigned long node_start, unsigned long node_goal
 
 int main (int argc, char* argv[]) {
 	int i;
-	unsigned long nnodes, ntotnsucc, ntotname, node_start, node_goal, node_current; //, node_successor;
+	unsigned long nnodes, num_total_successors, num_total_name, node_start, node_goal, node_current; //, node_successor;
 	unsigned long *allsuccessors;
 	char *allnames;
 	Node *nodes;
@@ -156,8 +156,8 @@ int main (int argc, char* argv[]) {
 
 	/* Global data --- header */
 	if ( fread(&nnodes, sizeof(unsigned long), 1, fin) +
-	fread(&ntotnsucc, sizeof(unsigned long), 1, fin) +
-	fread(&ntotname, sizeof(unsigned long), 1, fin) != 3 ) {
+	fread(&num_total_successors, sizeof(unsigned long), 1, fin) +
+	fread(&num_total_name, sizeof(unsigned long), 1, fin) != 3 ) {
 		printf("when reading the header of the binary data file\n");
 	}
 
@@ -165,10 +165,10 @@ int main (int argc, char* argv[]) {
 	if ((nodes = (Node *) malloc(nnodes*sizeof(Node))) == NULL) {
 		printf("when allocating memory for the nodes vector\n");
 	}
-	if ((allsuccessors = (unsigned long *) malloc(ntotnsucc*sizeof(unsigned long))) == NULL) {
+	if ((allsuccessors = (unsigned long *) malloc(num_total_successors*sizeof(unsigned long))) == NULL) {
 		printf("when allocating memory for the edges vector\n");
 	}
-	if ((allnames = (char *) malloc(ntotname*sizeof(char))) == NULL) {
+	if ((allnames = (char *) malloc(num_total_name*sizeof(char))) == NULL) {
 		printf("when allocating memory for the names\n");
 	}
 
@@ -176,10 +176,10 @@ int main (int argc, char* argv[]) {
 	if ( fread(nodes, sizeof(Node), nnodes, fin) != nnodes ) {
 		printf("when reading nodes from the binary data file\n");
 	}
-	if ( fread(allsuccessors, sizeof(unsigned long), ntotnsucc, fin) != ntotnsucc ) {
+	if ( fread(allsuccessors, sizeof(unsigned long), num_total_successors, fin) != num_total_successors ) {
 		printf("when reading sucessors from the binary data file\n");
 	}
-	if ( fread(allnames, sizeof(char), ntotname, fin) != ntotname ) {
+	if ( fread(allnames, sizeof(char), num_total_name, fin) != num_total_name ) {
 		printf("when reading names from the binary data file\n");
 	}
 	fclose(fin);
@@ -190,17 +190,17 @@ int main (int argc, char* argv[]) {
 
 	//Setting pointers to successors
 	for (i = 0; i < nnodes; i++) {
-		if (nodes[i].nsucc) {
+		if (nodes[i].num_successors) {
 			nodes[i].successors = allsuccessors;
-			allsuccessors += nodes[i].nsucc;
+			allsuccessors += nodes[i].num_successors;
 		}
 	}
 
 	//Setting pointers to names
 	for (i = 0; i < nnodes; i++) {
-		if (nodes[i].namelen) {
+		if (nodes[i].name_lenght) {
 			nodes[i].name = allnames;
-			allnames += nodes[i].namelen;
+			allnames += nodes[i].name_lenght;
 		}
 	}
 
@@ -229,7 +229,7 @@ int main (int argc, char* argv[]) {
 			break;
 		}
 
-		for (i = 0; i < nodes[node_current].nsucc; i++) {
+		for (i = 0; i < nodes[node_current].num_successors; i++) {
 			unsigned long node_successor = nodes[node_current].successors[i];
 			successor_current_cost = status[node_current].g + distance(nodes, node_current, node_successor);
 
@@ -263,15 +263,15 @@ int main (int argc, char* argv[]) {
 
 	// Print the route
 	unsigned long * path;
-	unsigned long next_node;
+	unsigned long node_next;
 	i = 0;
-	next_node = node_current;
+	node_next = node_current;
 	path = (unsigned long *)malloc(nnodes*sizeof(unsigned long));
-	path[0] = next_node;
-	while (next_node != node_start) {
+	path[0] = node_next;
+	while (node_next != node_start) {
 		i++;
-		next_node = status[next_node].parent;
-		path[i] = next_node;
+		node_next = status[node_next].parent;
+		path[i] = node_next;
 	}
 	int path_length = i + 1;
 

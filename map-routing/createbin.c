@@ -22,11 +22,11 @@
 #include <limits.h>
 
 typedef struct {
-	unsigned long id;     // Node identification
-	unsigned short namelen;
+	unsigned long id;              // Node identification
+	unsigned short name_lenght;
 	char *name;
-	double lat, lon;      // Node position
-	unsigned short nsucc; // Node successors: wighted edges
+	double lat, lon;               // Node position
+	unsigned short num_successors; // Node successors: wighted edges
 	unsigned long *successors;
 } Node;
 
@@ -74,8 +74,8 @@ int main(int argc, char* argv[]) {
 		field = strsep(&buffer, "|");
 		if((nodes[i].id = strtoul(field, '\0', 10)) == 0) printf("ERROR: Conversion failed.\n");
 		field = strsep(&buffer, "|");
-		nodes[i].namelen = strlen(field) + 1;
-		nodes[i].name = (char *) malloc(nodes[i].namelen*sizeof(char));
+		nodes[i].name_lenght = strlen(field) + 1;
+		nodes[i].name = (char *) malloc(nodes[i].name_lenght*sizeof(char));
 		strcpy(nodes[i].name, field);
 		field = strsep(&buffer, "|");
 		nodes[i].lat = atof(field);
@@ -96,7 +96,7 @@ int main(int argc, char* argv[]) {
 	// READING WAYS
 	file = fopen("data/spain-ways.csv", "r");
 
-	unsigned long a, b, A, B, member, waylen, index;
+	unsigned long a, b, A, B, member, way_lenght, index;
 	bool oneway;
 
 	for (i = 0; i < nnodes; i++) {
@@ -126,21 +126,21 @@ int main(int argc, char* argv[]) {
 					n++;
 			}
 		}
-		waylen = n;
+		way_lenght = n;
 		n = 0;
 
-		for (j = 0; j < waylen-1; j++) {
+		for (j = 0; j < way_lenght - 1; j++) {
 			A = way[j];
 			a = perform_binary_search(A, nodes, nnodes);
 			B = way[j + 1];
 			b = perform_binary_search(B, nodes, nnodes);
 
-			nodes[a].successors[nodes[a].nsucc] = b;
-			nodes[a].nsucc++;
+			nodes[a].successors[nodes[a].num_successors] = b;
+			nodes[a].num_successors++;
 
 			if(oneway == 0) {
-				nodes[b].successors[nodes[b].nsucc] = a;
-				nodes[b].nsucc++;
+				nodes[b].successors[nodes[b].num_successors] = a;
+				nodes[b].num_successors++;
 			}
 		}
 
@@ -157,14 +157,14 @@ int main(int argc, char* argv[]) {
 	// CREATING BIN FILE
 	const char filename[] = "data/spain-data.bin";
 
-	unsigned long ntotnsucc = 0UL;
+	unsigned long num_total_successors = 0UL;
 	for (i = 0; i < nnodes; i++) {
-		ntotnsucc += nodes[i].nsucc;
+		num_total_successors += nodes[i].num_successors;
 	}
 
-	unsigned long ntotname = 0UL;
+	unsigned long num_total_name = 0UL;
 	for (i = 0; i < nnodes; i++) {
-		ntotname += nodes[i].namelen;
+		num_total_name += nodes[i].name_lenght;
 	}
 	printf("Starting to write the bin file.\n");
 
@@ -172,8 +172,8 @@ int main(int argc, char* argv[]) {
 
 	// Global data --- header
 	if( fwrite(&nnodes, sizeof(unsigned long), 1, file) +
-	fwrite(&ntotnsucc, sizeof(unsigned long), 1, file) +
-	fwrite(&ntotname, sizeof(unsigned long), 1, file)!= 3 ) {
+	fwrite(&num_total_successors, sizeof(unsigned long), 1, file) +
+	fwrite(&num_total_name, sizeof(unsigned long), 1, file)!= 3 ) {
 		printf("Error when initializing the output binary data file.\n");
 	}
 
@@ -183,15 +183,15 @@ int main(int argc, char* argv[]) {
 	}
 
 	// Writing sucessors in blocks
-	for (i = 0; i < nnodes; i++) if(nodes[i].nsucc) {
-		if( fwrite(nodes[i].successors, sizeof(unsigned long), nodes[i].nsucc, file) != nodes[i].nsucc ) {
+	for (i = 0; i < nnodes; i++) if(nodes[i].num_successors) {
+		if( fwrite(nodes[i].successors, sizeof(unsigned long), nodes[i].num_successors, file) != nodes[i].num_successors ) {
 			printf("Error when writing edges to the output binary data file.\n");
 		}
 	}
 
 	// Writing names in blocks
-	for (i = 0; i < nnodes; i++) if(nodes[i].namelen) {
-		if( fwrite(nodes[i].name, sizeof(char), nodes[i].namelen, file) != nodes[i].namelen ) {
+	for (i = 0; i < nnodes; i++) if(nodes[i].name_lenght) {
+		if( fwrite(nodes[i].name, sizeof(char), nodes[i].name_lenght, file) != nodes[i].name_lenght ) {
 			printf("Error when writing names to the output binary data file.\n");
 		}
 	}
