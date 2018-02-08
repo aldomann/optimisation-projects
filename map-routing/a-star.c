@@ -39,23 +39,23 @@ enum whichQueue {
 };
 
 typedef struct {
-	double g, h;
+	double g_cost, h_cost;
 	unsigned long parent;
 	Queue whq;
 } AStarStatus;
 
 typedef struct Node {
-	double f;
+	double f_cost;
 	unsigned long index;
 	struct Node *next;
 } LinkedNode;
 
 // Linked List functions
-void push(LinkedNode **head, double f, unsigned long index) {
+void push(LinkedNode **head, double f_cost, unsigned long index) {
 	LinkedNode *node_new;
 	node_new = malloc(sizeof(LinkedNode));
 
-	node_new -> f = f;
+	node_new -> f_cost = f_cost;
 	node_new -> index = index;
 	node_new -> next = *head;
 	*head = node_new;
@@ -106,9 +106,9 @@ unsigned long index_minimum(LinkedNode *head) {
 	double min = 9999999;
 
 	while (current != NULL) {
-		if (current -> f < min) {
+		if (current -> f_cost < min) {
 			minimum = current;
-			min = current -> f;
+			min = current -> f_cost;
 		}
 		current = current -> next;
 	}
@@ -167,7 +167,7 @@ void print_path (Node *nodes, AStarStatus *status, unsigned long node_start, uns
 	printf("Node ID, Distance (m), Lat, Lon\n");
 	// Print nodes
 	for (i = path_length-1; i >= 0;i--) {
-		printf("%lu, %.2f, %.5f, %.5f \n", nodes[path[i]].id, status[path[i]].g, nodes[path[i]].lat, nodes[path[i]].lon);
+		printf("%lu, %.2f, %.5f, %.5f \n", nodes[path[i]].id, status[path[i]].g_cost, nodes[path[i]].lat, nodes[path[i]].lon);
 	}
 }
 
@@ -185,30 +185,30 @@ void astar_algorithm (Node *nodes, LinkedNode *open_list, AStarStatus *status, u
 
 		for (i = 0; i < nodes[node_current].num_successors; i++) {
 			unsigned long node_successor = nodes[node_current].successors[i];
-			successor_current_cost = status[node_current].g + distance(nodes, node_current, node_successor);
+			successor_current_cost = status[node_current].g_cost + distance(nodes, node_current, node_successor);
 
 			if (status[node_successor].whq == OPEN) {
-				if (status[node_successor].g <= successor_current_cost){
+				if (status[node_successor].g_cost <= successor_current_cost){
 					continue;
 				}
 			} else if (status[node_successor].whq == CLOSED) {
-				if (status[node_successor].g <= successor_current_cost) continue;
+				if (status[node_successor].g_cost <= successor_current_cost) continue;
 
 				status[node_successor].whq = OPEN;
-				push(&open_list, successor_current_cost + status[node_successor].h, node_successor);
+				push(&open_list, successor_current_cost + status[node_successor].h_cost, node_successor);
 			} else {
 				status[node_successor].whq = OPEN;
-				status[node_successor].h = distance(nodes, node_successor, node_goal);
-				push(&open_list, (successor_current_cost + status[node_successor].h), node_successor);
+				status[node_successor].h_cost = distance(nodes, node_successor, node_goal);
+				push(&open_list, (successor_current_cost + status[node_successor].h_cost), node_successor);
 			}
 
-			status[node_successor].g = successor_current_cost;
+			status[node_successor].g_cost = successor_current_cost;
 			status[node_successor].parent = node_current;
 		}
 		status[node_current].whq = CLOSED;
 
 		if ((remove_by_index(&open_list, node_current)) != 1) {
-			printf("Remove failed.\n");
+			printf("Removal failed.\n");
 		}
 	}
 	if (node_current != node_goal) {
@@ -231,36 +231,36 @@ int main (int argc, char* argv[]) {
 	FILE *fin;
 
 	if ((fin = fopen ("data/spain-data.bin", "r")) == NULL) {
-		printf("the data file does not exist or cannot be opened\n");
+		printf("The data file does not exist or cannot be opened\n");
 	}
 
 	/* Global data --- header */
 	if ( fread(&nnodes, sizeof(unsigned long), 1, fin) +
 	fread(&num_total_successors, sizeof(unsigned long), 1, fin) +
 	fread(&num_total_name, sizeof(unsigned long), 1, fin) != 3 ) {
-		printf("when reading the header of the binary data file\n");
+		printf("Error when reading the header of the binary data file\n");
 	}
 
 	/* getting memory for all data */
 	if ((nodes = (Node *) malloc(nnodes*sizeof(Node))) == NULL) {
-		printf("when allocating memory for the nodes vector\n");
+		printf("Error when allocating memory for the nodes vector\n");
 	}
 	if ((allsuccessors = (unsigned long *) malloc(num_total_successors*sizeof(unsigned long))) == NULL) {
-		printf("when allocating memory for the edges vector\n");
+		printf("Error when allocating memory for the edges vector\n");
 	}
 	if ((allnames = (char *) malloc(num_total_name*sizeof(char))) == NULL) {
-		printf("when allocating memory for the names\n");
+		printf("Error when allocating memory for the names\n");
 	}
 
 	/* Reading all data from file */
 	if ( fread(nodes, sizeof(Node), nnodes, fin) != nnodes ) {
-		printf("when reading nodes from the binary data file\n");
+		printf("Error when reading nodes from the binary data file\n");
 	}
 	if ( fread(allsuccessors, sizeof(unsigned long), num_total_successors, fin) != num_total_successors ) {
-		printf("when reading sucessors from the binary data file\n");
+		printf("Error when reading sucessors from the binary data file\n");
 	}
 	if ( fread(allnames, sizeof(char), num_total_name, fin) != num_total_name ) {
-		printf("when reading names from the binary data file\n");
+		printf("Error when reading names from the binary data file\n");
 	}
 	fclose(fin);
 
@@ -295,10 +295,10 @@ int main (int argc, char* argv[]) {
 	AStarStatus *status;
 	status = (AStarStatus *)malloc(sizeof(AStarStatus)*nnodes);
 
-	status[node_start].g = 0;
-	status[node_start].h = distance(nodes, node_start, node_goal);
+	status[node_start].g_cost = 0;
+	status[node_start].h_cost = distance(nodes, node_start, node_goal);
 	status[node_start].whq = OPEN;
-	push(&open_list, status[node_start].h, node_start);
+	push(&open_list, status[node_start].h_cost, node_start);
 
 	// A* Algorithm
 	astar_algorithm(nodes, open_list, status, node_start, node_goal, nnodes);
