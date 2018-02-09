@@ -1,0 +1,14 @@
+
+ Performance counter stats for './write_bin':
+
+      20733.878637      task-clock:u (msec)       #    0.719 CPUs utilized
+                 0      context-switches:u        #    0.000 K/sec
+                 0      cpu-migrations:u          #    0.000 K/sec
+         2,201,072      page-faults:u             #    0.106 M/sec
+    73,286,796,414      cycles:u                  #    3.535 GHz
+   124,228,356,011      instructions:u            #    1.70  insn per cycle
+    28,323,188,539      branches:u                # 1366.034 M/sec
+       573,732,738      branch-misses:u           #    2.03% of all branches
+
+      28.817602691 seconds time elapsed
+
