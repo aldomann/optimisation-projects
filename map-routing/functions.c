@@ -102,19 +102,19 @@ unsigned long perform_binary_search(unsigned long key, unsigned long *list, unsi
 // Haversine Distance function
 double distance (Node *nodes, unsigned long node_start, unsigned long node_goal) {
 	double R = 6371000;
-	double lat1 = nodes[node_start].lat*(M_PI/180);
-	double lat2 = nodes[node_goal].lat*(M_PI/180);
-	double lon1 = nodes[node_start].lon*(M_PI/180);
-	double lon2 = nodes[node_goal].lon*(M_PI/180);
-	double d_lat = lat2-lat1;
-	double d_lon = lon2-lon1;
-	double a = sin(d_lat/2) * sin(d_lat/2) + cos(lat1) * cos(lat2) * sin(d_lon/2) * sin(d_lon/2);
+	double lat1 = nodes[node_start].lat * (M_PI/180);
+	double lat2 = nodes[node_goal].lat * (M_PI/180);
+	double lon1 = nodes[node_start].lon * (M_PI/180);
+	double lon2 = nodes[node_goal].lon * (M_PI/180);
+	double delta_lat = lat2 - lat1;
+	double delta_lon = lon2 - lon1;
+	double a = sin(delta_lat/2) * sin(delta_lat/2) + cos(lat1) * cos(lat2) * sin(delta_lon/2) * sin(delta_lon/2);
 	double c = 2 * atan2(sqrt(a), sqrt(1-a));
 	return R * c;
 }
 
 // Function to print path
-void print_path (Node *nodes, AStarStatus *status, unsigned long node_start, unsigned long node_goal, unsigned long node_current, unsigned long nnodes) {
+inline void print_path (Node *nodes, AStarStatus *status, unsigned long node_start, unsigned long node_goal, unsigned long node_current, unsigned long nnodes) {
 	// Print the path
 	unsigned long *path;
 	unsigned long node_next;
@@ -139,7 +139,7 @@ void print_path (Node *nodes, AStarStatus *status, unsigned long node_start, uns
 }
 
 // A* Algorithm
-void astar_algorithm (Node *nodes, DynamicNode *open_list, AStarStatus *status, unsigned long node_start, unsigned long node_goal, unsigned long nnodes ) {
+inline void astar_algorithm (Node *nodes, DynamicNode *open_list, AStarStatus *status, unsigned long node_start, unsigned long node_goal, unsigned long nnodes ) {
 	double successor_current_cost;
 	unsigned long node_current;
 
