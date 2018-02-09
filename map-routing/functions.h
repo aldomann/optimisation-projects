@@ -33,9 +33,7 @@ typedef struct {
 } Node;
 
 typedef char Queue;
-enum whichQueue {
-	NONE, OPEN, CLOSED
-};
+enum whichQueue { NONE, OPEN, CLOSED };
 
 typedef struct {
 	double g_cost, h_cost;

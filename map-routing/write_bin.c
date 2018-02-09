@@ -61,8 +61,8 @@ int main(int argc, char* argv[]) {
 	Node *nodes;
 	unsigned long nnodes = 23895681UL;
 	nodes = (Node *) malloc(nnodes*sizeof(Node));
-	unsigned long *way;
-	way = (unsigned long *)malloc(sizeof(unsigned long) * 5306);
+	unsigned long *ways;
+	ways = (unsigned long *)malloc(sizeof(unsigned long) * 5306);
 
 	// READING NODES
 	FILE *file;
@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
 		while((field = strsep(&buffer, "|")) != NULL) {
 			member = strtoul(field, '\0', 10);
 			if((index = perform_binary_search(member, nodes, nnodes)) != ULONG_MAX) {
-					way[n] = member;
+					ways[n] = member;
 					n++;
 			}
 		}
@@ -130,9 +130,9 @@ int main(int argc, char* argv[]) {
 		n = 0;
 
 		for (j = 0; j < way_lenght - 1; j++) {
-			A = way[j];
+			A = ways[j];
 			a = perform_binary_search(A, nodes, nnodes);
-			B = way[j + 1];
+			B = ways[j + 1];
 			b = perform_binary_search(B, nodes, nnodes);
 
 			nodes[a].successors[nodes[a].num_successors] = b;
