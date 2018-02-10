@@ -30,7 +30,7 @@ typedef struct {
 	unsigned long *successors;
 } Node;
 
-unsigned long perform_binary_search(unsigned long key, Node *nodes, unsigned long lenlist) {
+unsigned long perform_binary_search (unsigned long key, Node *nodes, unsigned long lenlist) {
 	register unsigned long start = 0UL, afterend = lenlist, middle;
 	register unsigned long try;
 	while ( afterend > start ) {

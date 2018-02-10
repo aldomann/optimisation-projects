@@ -18,7 +18,7 @@
 #include "functions.h"
 
 // Linked List functions
-void push(DynamicNode **head, double f_cost, unsigned long index) {
+void append (DynamicNode **head, double f_cost, unsigned long index) {
 	DynamicNode *node_new;
 	node_new = malloc(sizeof(DynamicNode));
 
@@ -28,7 +28,7 @@ void push(DynamicNode **head, double f_cost, unsigned long index) {
 	*head = node_new;
 }
 
-int remove_first(DynamicNode **head) {
+int pop_first (DynamicNode **head) {
 	DynamicNode *node_next = NULL;
 
 	if (*head == NULL) {
@@ -41,7 +41,7 @@ int remove_first(DynamicNode **head) {
 	return 1;
 }
 
-int remove_by_index(DynamicNode **head, unsigned long index) {
+int pop_by_index (DynamicNode **head, unsigned long index) {
 	DynamicNode *current = *head;
 	if (current == NULL) {
 		return -1;
@@ -49,7 +49,7 @@ int remove_by_index(DynamicNode **head, unsigned long index) {
 	DynamicNode *node_temp = NULL;
 
 	if (index == current -> index) {
-		remove_first(head);
+		pop_first(head);
 		return 1;
 	}
 
@@ -64,7 +64,7 @@ int remove_by_index(DynamicNode **head, unsigned long index) {
 	return 1;
 }
 
-unsigned long index_minimum(DynamicNode *head) {
+unsigned long index_minimum (DynamicNode *head) {
 	DynamicNode *current = head;
 	if (current == NULL) {
 		return ULONG_MAX;
@@ -83,7 +83,7 @@ unsigned long index_minimum(DynamicNode *head) {
 }
 
 // Binary Search function
-unsigned long perform_binary_search(unsigned long key, unsigned long *list, unsigned long lenlist) {
+unsigned long perform_binary_search (unsigned long key, unsigned long *list, unsigned long lenlist) {
 	register unsigned long start = 0UL, afterend = lenlist, middle;
 	register unsigned long try;
 	while ( afterend > start ) {
@@ -162,11 +162,11 @@ inline void astar_algorithm (Node *nodes, DynamicNode *open_list, AStarStatus *s
 				if (status[node_successor].g_cost <= successor_current_cost) continue;
 
 				status[node_successor].queue_status = OPEN;
-				push(&open_list, successor_current_cost + status[node_successor].h_cost, node_successor);
+				append(&open_list, successor_current_cost + status[node_successor].h_cost, node_successor);
 			} else {
 				status[node_successor].queue_status = OPEN;
 				status[node_successor].h_cost = distance(nodes, node_successor, node_goal);
-				push(&open_list, (successor_current_cost + status[node_successor].h_cost), node_successor);
+				append(&open_list, (successor_current_cost + status[node_successor].h_cost), node_successor);
 			}
 
 			status[node_successor].g_cost = successor_current_cost;
@@ -174,7 +174,7 @@ inline void astar_algorithm (Node *nodes, DynamicNode *open_list, AStarStatus *s
 		}
 		status[node_current].queue_status = CLOSED;
 
-		if ((remove_by_index(&open_list, node_current)) != 1) {
+		if ((pop_by_index(&open_list, node_current)) != 1) {
 			printf("Removal failed.\n");
 		}
 	}

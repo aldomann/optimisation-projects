@@ -96,7 +96,7 @@ int main (int argc, char* argv[]) {
 	status[node_start].g_cost = 0;
 	status[node_start].h_cost = distance(nodes, node_start, node_goal);
 	status[node_start].queue_status = OPEN;
-	push(&open_list, status[node_start].h_cost, node_start);
+	append(&open_list, status[node_start].h_cost, node_start);
 
 	// A* Algorithm
 	astar_algorithm(nodes, open_list, status, node_start, node_goal, nnodes);

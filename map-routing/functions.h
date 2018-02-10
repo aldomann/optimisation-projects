@@ -48,13 +48,13 @@ typedef struct Node {
 } DynamicNode;
 
 // Linked List functions
-void push(DynamicNode **head, double f_cost, unsigned long index);
-int remove_first(DynamicNode **head);
-int remove_by_index(DynamicNode **head, unsigned long index);
-unsigned long index_minimum(DynamicNode *head);
+void append (DynamicNode **head, double f_cost, unsigned long index);
+int pop_first (DynamicNode **head);
+int pop_by_index (DynamicNode **head, unsigned long index);
+unsigned long index_minimum (DynamicNode *head);
 
 // Binary Search function
-unsigned long perform_binary_search(unsigned long key, unsigned long *list, unsigned long lenlist);
+unsigned long perform_binary_search (unsigned long key, unsigned long *list, unsigned long lenlist);
 
 // Haversine Distance function
 double distance (Node *nodes, unsigned long node_start, unsigned long node_goal);
