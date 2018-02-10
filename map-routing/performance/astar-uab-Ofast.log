@@ -1,0 +1,14 @@
+
+ Performance counter stats for './astar-input 240949599 255403621':
+
+        802.333460      task-clock:u (msec)       #    0.979 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+            52,929      page-faults:u             #    0.066 M/sec                  
+     1,368,136,187      cycles:u                  #    1.705 GHz                    
+       910,993,985      instructions:u            #    0.67  insn per cycle         
+       177,990,697      branches:u                #  221.841 M/sec                  
+           508,099      branch-misses:u           #    0.29% of all branches        
+
+       0.819275186 seconds time elapsed
+

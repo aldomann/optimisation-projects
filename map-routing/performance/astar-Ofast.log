@@ -1,0 +1,14 @@
+
+ Performance counter stats for './astar':
+
+       8599.585359      task-clock:u (msec)       #    1.000 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+           178,630      page-faults:u             #    0.021 M/sec                  
+    33,684,703,553      cycles:u                  #    3.917 GHz                    
+    24,935,418,290      instructions:u            #    0.74  insn per cycle         
+     3,828,065,982      branches:u                #  445.145 M/sec                  
+         9,542,973      branch-misses:u           #    0.25% of all branches        
+
+       8.599850430 seconds time elapsed
+
