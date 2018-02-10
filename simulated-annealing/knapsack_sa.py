@@ -30,31 +30,32 @@ os.chdir(os.path.join(home))
 MAX_TEMP = 100
 MAX_ITER = 500000
 
-# Old code
-# values, weights = np.genfromtxt('data.dat', delimiter=',').transpose()
-
-# Praise Bill
 data = pd.read_csv('data.dat')
 values = np.array(data["values"])
 weights = np.array(data["weights"])
 
-ind = np.ones(len(values))
-# Gotta decide the shape of these arrays
-#inds = np.empty(shape = [len(values)], dtype="float64")
+ind = np.random.randint(2, size = len(data))
 inds = np.empty(0)
 temp = np.empty(0)
 prob = np.empty(0)
 solution = np.empty(0)
 
-inds = np.append(inds, 2)
 
 def get_value(ind, values, weights):
-	a = sum(ind * weights)
-	if (a <= 600):
-		b = sum(ind * values)
+	total_weight = sum(ind * weights)
+	if (total_weight <= 600):
+		total_value = sum(ind * values)
 	else:
-		b = - sum(ind * weights)**100
-	return b
+		total_value = - total_weight**100
+	return total_value
 
-# Testing the function
-get_value(ind, values, weights)
+def random_walk():
+	return np.random.randint(2)
+
+def moving_average(arr, n = 100):
+	res = arr
+	for i in range(n, len(arr)):
+		res[i] = np.mean(arr[(i-n):i])
+	return res
+
+
