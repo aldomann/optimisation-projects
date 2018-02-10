@@ -36,9 +36,9 @@ unsigned long perform_binary_search (unsigned long key, Node *nodes, unsigned lo
 	while ( afterend > start ) {
 		middle = start + ((afterend-start-1)>>1);
 		try = nodes[middle].id;
-		if ( key == try ) {
+		if (key == try) {
 			return middle;
-		} else if ( key > try ) {
+		} else if (key > try) {
 			start = middle + 1;
 		} else {
 			afterend = middle;
@@ -72,7 +72,9 @@ int main(int argc, char* argv[]) {
 	while((bytes_read = getline(&buffer, &bufsize, file)) != -1) {
 		field = strsep(&buffer, "|");
 		field = strsep(&buffer, "|");
-		if((nodes[i].id = strtoul(field, '\0', 10)) == 0) printf("ERROR: Conversion failed.\n");
+		if ((nodes[i].id = strtoul(field, '\0', 10)) == 0) {
+			printf("ERROR: Conversion failed.\n");
+		}
 		field = strsep(&buffer, "|");
 		nodes[i].name_lenght = strlen(field) + 1;
 		nodes[i].name = (char *) malloc(nodes[i].name_lenght*sizeof(char));
@@ -82,7 +84,7 @@ int main(int argc, char* argv[]) {
 		field = strsep(&buffer, "|");
 		nodes[i].lon = atof(field);
 		i++;
-		if(i % 500000 == 0) {
+		if (i % 500000 == 0) {
 			double x = ((100*(double)i)/(double)nnodes);
 			printf("%.2f percent of the nodes have been read.\n", x);
 		}
@@ -100,7 +102,7 @@ int main(int argc, char* argv[]) {
 	bool oneway;
 
 	for (i = 0; i < nnodes; i++) {
-		if((nodes[i].successors = (unsigned long *)malloc(sizeof(unsigned long)*16)) == NULL) {
+		if ((nodes[i].successors = (unsigned long *)malloc(sizeof(unsigned long)*16)) == NULL) {
 			printf("Memory allocation for the successors failed at node %lu\n", i);
 			break;
 		}
@@ -121,7 +123,7 @@ int main(int argc, char* argv[]) {
 
 		while((field = strsep(&buffer, "|")) != NULL) {
 			member = strtoul(field, '\0', 10);
-			if((index = perform_binary_search(member, nodes, nnodes)) != ULONG_MAX) {
+			if ((index = perform_binary_search(member, nodes, nnodes)) != ULONG_MAX) {
 					ways[n] = member;
 					n++;
 			}
@@ -138,13 +140,13 @@ int main(int argc, char* argv[]) {
 			nodes[a].successors[nodes[a].num_successors] = b;
 			nodes[a].num_successors++;
 
-			if(oneway == 0) {
+			if (oneway == 0) {
 				nodes[b].successors[nodes[b].num_successors] = a;
 				nodes[b].num_successors++;
 			}
 		}
 
-		if(i % 500000 == 0) {
+		if (i % 500000 == 0) {
 			double x = ((100*(double)i)/(double)nnodes);
 			printf("%.2f percent of the ways have been read.\n", x);
 		}
@@ -171,28 +173,32 @@ int main(int argc, char* argv[]) {
 	if ((file = fopen (filename, "wb")) == NULL) printf("The output binary data file cannot be opened.\n");
 
 	// Global data --- header
-	if( fwrite(&nnodes, sizeof(unsigned long), 1, file) +
+	if (fwrite(&nnodes, sizeof(unsigned long), 1, file) +
 	fwrite(&num_total_successors, sizeof(unsigned long), 1, file) +
-	fwrite(&num_total_name, sizeof(unsigned long), 1, file)!= 3 ) {
+	fwrite(&num_total_name, sizeof(unsigned long), 1, file)!= 3) {
 		printf("Error when initializing the output binary data file.\n");
 	}
 
 	// Writing all nodes
-	if( fwrite(nodes, sizeof(Node), nnodes, file) != nnodes ) {
+	if (fwrite(nodes, sizeof(Node), nnodes, file) != nnodes) {
 		printf("Error when writing nodes to the output binary data file.\n");
 	}
 
 	// Writing sucessors in blocks
-	for (i = 0; i < nnodes; i++) if(nodes[i].num_successors) {
-		if( fwrite(nodes[i].successors, sizeof(unsigned long), nodes[i].num_successors, file) != nodes[i].num_successors ) {
-			printf("Error when writing edges to the output binary data file.\n");
+	for (i = 0; i < nnodes; i++) {
+		if (nodes[i].num_successors) {
+			if (fwrite(nodes[i].successors, sizeof(unsigned long), nodes[i].num_successors, file) != nodes[i].num_successors) {
+				printf("Error when writing edges to the output binary data file.\n");
+			}
 		}
 	}
 
 	// Writing names in blocks
-	for (i = 0; i < nnodes; i++) if(nodes[i].name_lenght) {
-		if( fwrite(nodes[i].name, sizeof(char), nodes[i].name_lenght, file) != nodes[i].name_lenght ) {
-			printf("Error when writing names to the output binary data file.\n");
+	for (i = 0; i < nnodes; i++) {
+		if (nodes[i].name_lenght) {
+			if (fwrite(nodes[i].name, sizeof(char), nodes[i].name_lenght, file) != nodes[i].name_lenght) {
+				printf("Error when writing names to the output binary data file.\n");
+			}
 		}
 	}
 

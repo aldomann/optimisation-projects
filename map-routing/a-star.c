@@ -26,16 +26,16 @@ int main (int argc, char* argv[]) {
 	Node *nodes;
 
 	// Read binary file
-	FILE *fin;
+	FILE *file_in;
 
-	if ((fin = fopen ("data/spain-data.bin", "r")) == NULL) {
+	if ((file_in = fopen ("data/spain-data.bin", "r")) == NULL) {
 		printf("The data file does not exist or cannot be opened\n");
 	}
 
 	/* Global data --- header */
-	if ( fread(&nnodes, sizeof(unsigned long), 1, fin) +
-	fread(&num_total_successors, sizeof(unsigned long), 1, fin) +
-	fread(&num_total_name, sizeof(unsigned long), 1, fin) != 3 ) {
+	if ( fread(&nnodes, sizeof(unsigned long), 1, file_in) +
+	fread(&num_total_successors, sizeof(unsigned long), 1, file_in) +
+	fread(&num_total_name, sizeof(unsigned long), 1, file_in) != 3 ) {
 		printf("Error when reading the header of the binary data file\n");
 	}
 
@@ -51,16 +51,16 @@ int main (int argc, char* argv[]) {
 	}
 
 	/* Reading all data from file */
-	if ( fread(nodes, sizeof(Node), nnodes, fin) != nnodes ) {
+	if ( fread(nodes, sizeof(Node), nnodes, file_in) != nnodes ) {
 		printf("Error when reading nodes from the binary data file\n");
 	}
-	if ( fread(allsuccessors, sizeof(unsigned long), num_total_successors, fin) != num_total_successors ) {
+	if ( fread(allsuccessors, sizeof(unsigned long), num_total_successors, file_in) != num_total_successors ) {
 		printf("Error when reading sucessors from the binary data file\n");
 	}
-	if ( fread(allnames, sizeof(char), num_total_name, fin) != num_total_name ) {
+	if ( fread(allnames, sizeof(char), num_total_name, file_in) != num_total_name ) {
 		printf("Error when reading names from the binary data file\n");
 	}
-	fclose(fin);
+	fclose(file_in);
 
 	unsigned long *list;
 	list = (unsigned long *)malloc(sizeof(unsigned long)*nnodes);
