@@ -25,10 +25,32 @@ results <- data.frame(tot.value = values,
 											temp = temps,
 											prob = probs)
 
-# write.csv(results, "results.csv")
+n.iter = nrow(results)
+
+write.csv(results, "results.csv")
 
 tail(weights)
 print(solution)
 
-ggplot(results) +
-	geom_path(aes(y = probs))
+gg.value <- ggplot(results) +
+	geom_point(aes(x = seq(1:n.iter), y = tot.value), size = 0.5) +
+	labs(title = "",
+			 x = "Time step (iteration)",
+			 y = "Total value of the items")
+
+ggc.weight <- ggplot(results) +
+	geom_point(aes(x = seq(1:n.iter), y = tot.weight), size = 0.5) +
+	labs(title = "",
+			 x = "Time step (iteration)",
+			 y = "Total weight of the items")
+
+gg.temp <- ggplot(results) +
+	geom_point(aes(x = seq(1:n.iter), y = temp)) +
+	labs(title = "",
+			 x = "Time step (iteration)",
+			 y = "Temperature")
+
+
+gg.value
+gg.weight
+gg.temp

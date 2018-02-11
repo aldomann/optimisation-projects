@@ -32,7 +32,7 @@ MAX_TEMP = 100
 MAX_ITER = 500000
 
 # Read the items data
-data = pd.read_csv('data.dat')
+data = pd.read_csv('data.csv')
 values = np.array(data["values"])
 weights = np.array(data["weights"])
 num_items = len(data)
