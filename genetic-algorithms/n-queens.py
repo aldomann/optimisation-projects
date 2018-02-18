@@ -82,7 +82,7 @@ def generate_population(population_size = 100):
 def get_parent(population = None):
 	# Get parent using a Tournament Selection algorithm
 	best_board = random.randint(0, len(population) - 1)
-	for i in range(1,TOURN_SIZE):
+	for i in range(0,TOURN_SIZE):
 		next_board = random.randint(0, len(population) - 1)
 		if ( population[next_board].fitness > population[best_board].fitness ):
 			best_board = next_board
