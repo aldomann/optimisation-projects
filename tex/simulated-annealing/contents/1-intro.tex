@@ -1,0 +1,90 @@
+%-----------------------------------------------------------------
+%	INTRODUCTION
+%	!TEX root = ./../main.tex
+%-----------------------------------------------------------------
+\section{Introduction}
+
+The knapsack problem is a classic and widely studied computational problem in combinatorial optimization. Given a set of items, each with a weight and a value, determine the number of each item to include in a collection so that the total weight is less than or equal to a given limit and the total value is as large as possible. It derives its name from the problem faced by someone who is constrained by a fixed-size knapsack and must fill it with the most valuable items. Because the knapsack problem is a very general problem in combinatorial optimization, it has applications in almost every field. For instance, in economics, the knapsack problem
+is analogous to a simple consumption model given a budget constraint. In other words, we choose from a
+list of objects to buy, each with a certain utility, subject to the budget constraint. One of the most interesting applications is in solving truck loading problem. We have to load a truck with some goods. The values and the weights of these goods are listed here\footnote{\url{http://mat.uab.cat/~alseda/MasterOpt/KnapsackData.dat}}, and the truck can carry a maximum weight of 600 Kg. We want to maximize the total value of the taken goods.
+
+\begin{table}[H]
+\centering
+% \resizebox{\textwidth}{!}{%
+    \begin{tabular}{cc}
+        \toprule
+        \toprule
+        values & weights \\
+        \midrule
+        18     & 17      \\
+        11     & 20      \\
+        15     & 15      \\
+        18     & 12      \\
+        15     & 13      \\
+        7      & 20      \\
+        17     & 13      \\
+        15     & 13      \\
+        22     & 16      \\
+        16     & 15      \\
+        18     & 14      \\
+        10     & 15      \\
+        13     & 21      \\
+        15     & 13      \\
+        16     & 20      \\
+        15     & 19      \\
+        12     & 7       \\
+                \bottomrule
+    \end{tabular}
+    \hspace{5pt}
+    \begin{tabular}{cc}
+        \toprule
+        \toprule
+        values & weights \\
+        \midrule
+        13     & 11      \\
+        12     & 16      \\
+        11     & 12      \\
+        14     & 14      \\
+        17     & 17      \\
+        12     & 18      \\
+        15     & 16      \\
+        7      & 17      \\
+        16     & 25      \\
+        16     & 27      \\
+        12     & 15      \\
+        16     & 7       \\
+        13     & 18      \\
+        16     & 13      \\
+        12     & 13      \\
+        10     & 24      \\
+        11     & 18      \\
+        \bottomrule
+    \end{tabular}
+    \hspace{5pt}
+    \begin{tabular}{cc}
+        \toprule
+        \toprule
+        values & weights \\
+        \midrule
+        13     & 17      \\
+        15     & 11      \\
+        16     & 18      \\
+        15     & 13      \\
+        11     & 16      \\
+        14     & 14      \\
+        21     & 16      \\
+        11     & 21      \\
+        13     & 17      \\
+        10     & 14      \\
+        14     & 18      \\
+        18     & 16      \\
+        17     & 15      \\
+        14     & 11      \\
+        11     & 23      \\
+        15     & 19      \\
+        --     & --      \\
+        \bottomrule
+    \end{tabular}
+    \caption{Values and Weights of Goods to Optimize}
+    \label{tab:problemdata}
+\end{table}

@@ -1,0 +1,76 @@
+%-----------------------------------------------------------------
+%	THEORITICAL BACKGROUND
+%	!TEX root = ./../main.tex
+%-----------------------------------------------------------------
+\section{Theoretical Background}
+
+In this section, a short theoretical background of the topics studied in this research work will be introduced.
+
+%-----------------------------------------------------------------
+\subsection{Single Source Shortest Path Problem}
+
+The Single-Source Shortest Paths (SSSP) problem, which calls for the computation of a tree of shortest paths from a given vertex in a directed or undirected graph with non-negative edge weights, is one of the most important and most studied algorithmic graph problems.
+
+Let $G = (V, E, w)$ be a weighted directed graph with two special vertices, and we want to find the shortest path from a source vertex $s$ to a target vertex $t$. That is, we want to find the directed path $p$ starting at $s$ and ending at $t$ that minimizes the function:
+\begin{align}
+    w (p) \coloneqq \sum_{u \to v \in p} w(u \to v) .
+\end{align}
+
+The shortest paths are unique, because any subpath of a shortest path is itself a shortest path. There are some algorithms that are usually used to solve SSSP problem, namely Dijkstra's Algorithm, Bellman–Ford Algorithm, Floyd-–Warshall Algorithm, A* Algorithm, etc. 
+
+%-----------------------------------------------------------------
+\subsection{The A* Algorithm}\label{sec:astar-pseudo}
+
+A* which is a slight generalization of Dijkstra's algorithm, is the most popular choice for path finding, because it is fairly flexible and can be used in a wide range of contexts. A* achieves better performance by using heuristics to guide its search. This heuristic was first described by Peter Hart, Nils Nilsson, and Bertram Raphael~\cite{Hart1972}.
+
+The secret to its success is that it combines the pieces of information that Dijkstra’s Algorithm uses (favoring vertices that are close to the starting point) and information that Greedy Best-First-Search uses (favoring vertices that are close to the goal). In the standard terminology used when talking about A*, $g(n)$ represents the exact cost of the path from the starting point to any vertex $n$, and $h(n)$ represents the heuristic estimated cost from vertex $n$ to the goal.
+
+At each iteration of its main loop, A* needs to determine which of its partial paths to expand into one or more longer paths. It does so based on an estimate of the cost (total weight) still to go to the goal node. Specifically, A* selects the path that minimizes
+
+\begin{align}
+    f(n) = g(n) + h(n)
+\end{align}
+
+The heuristic is problem-specific. For the algorithm to find the actual shortest path, the heuristic function must be admissible, meaning that it never overestimates the actual cost to get to the nearest goal node.
+
+\bigskip
+It is easier to understand the Algorithm using pseudocode. The following is the pseudocode of A* given by Prof. Lluís Alsedà~\cite{AlsedaPseudo}:
+
+\begin{algorithm}[caption={A* Algorithm Pseudocode}, label=sn:astar-pseudo, morekeywords={node_start, node_current, node_goal, node_successor, OPEN, CLOSED}]
+Put node_start in the OPEN list with (*$f$*)(node_start) = (*$h$*)(node_start)
+while the OPEN list is not empty {
+  Take from the open list the node node_current with the lowest
+    (*$f$*)(node_current) = (*$g$*)(node_current) + (*$h$*)(node_current)
+  if node_current is node_goal {
+    we have found the solution; break
+  }
+  Generate each state node_successor that come after node_current
+  for each node_successor of node_current {
+    Set successor_current_cost = (*$g$*)(node_current) + (*$w$*)(node_current, node_successor)
+    if node_successor (*$\in$*) OPEN list {
+      if (*$g$*)(node_successor) (*$\leq$*) successor_current_cost {
+        continue (to line (*\ref{nm:goto}*) )
+      }
+    } else if node_successor (*$\in$*) CLOSED list {
+      if (*$g$*)(node_successor) (*$\leq$*) successor_current_cost {
+        continue (to line (*\ref{nm:goto}*) )
+      }
+      Move node_successor from the CLOSED list to the OPEN list
+    } else {
+      Add node_successor to the OPEN list
+      Set (*$h$*)(node_successor) to be the heuristic distance to node_goal
+    }
+    Set (*$g$*)(node_successor) = successor_current_cost
+    Set the parent of node_successor to node_current
+  } (*\label{nm:goto}*)
+  Add node_current to the CLOSED list
+}
+if (node_current != node_goal) exit with error (the OPEN list is empty)
+\end{algorithm}
+
+The goal node is denoted by \inline{node_goal} and the source node is denoted by \inline{node_start}. In A*, we maintain two lists, which are \inline{OPEN} and \inline{CLOSED}. \inline{OPEN} consists on nodes that have been visited but not expanded (meaning that successors have not been explored yet). This is the list of pending tasks.
+\inline{CLOSED} consists on nodes that have been visited and expanded (successors have been explored already and included in the open list, if this was the case).
+
+\bigskip
+This is the the algorithm in which we will base our implementation.
+

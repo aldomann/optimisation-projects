@@ -1,0 +1,430 @@
+%-----------------------------------------------------------------
+%	BASIC DOCUMENT LAYOUT
+%-----------------------------------------------------------------
+\documentclass[paper=a4, fontsize=12pt, twoside=semi, abstracton, listof=totoc, toc=left]{scrartcl}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{slantsc}
+\usepackage{microtype}
+\usepackage[british]{babel}
+% \usepackage[backend=bibtex, style=phys, sorting=none, citestyle=authoryear, maxbibnames=3, maxcitenames=2]{biblatex}
+\usepackage[backend=bibtex, style=trad-abbrv, sorting=none, maxbibnames=3, maxcitenames=2]{biblatex}
+\addbibresource{bibliography.bib}
+% \bibliographystyle{apalike}
+\makeatletter
+	\def\blx@maxline{77}
+\makeatother
+
+% Sectioning layout
+\addtokomafont{sectioning}{\normalfont\scshape}
+\usepackage{tocstyle}
+\usetocstyle{standard}
+\renewcommand*\descriptionlabel[1]{\hspace\labelsep\normalfont\bfseries{#1}}
+\usepackage[titletoc]{appendix}
+
+% Empty pages
+\usepackage{etoolbox}
+% \pretocmd{\toc}{\cleardoubleevenemptypage}{}{}
+% \pretocmd{\section}{\cleardoubleevenemptypage}{}{}
+\pretocmd{\part}{\cleardoubleevenemptypage\thispagestyle{empty}}{}{}
+\renewcommand\partheadstartvskip{\clearpage\null\vfil}
+\renewcommand\partheadmidvskip{\par\nobreak\vskip 20pt\thispagestyle{empty}}
+
+% Paragraph indentation behaviour
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.3\baselineskip plus2pt minus2pt}
+\newcommand{\sk}{\medskip\noindent}
+
+% Fancy header and footer
+\usepackage{fancyhdr}
+\pagestyle{fancyplain}
+\fancyhead[LO]{\thepage}
+\fancyhead[CO]{}
+\fancyhead[RO]{\nouppercase{\mytitle}}
+\fancyhead[LE]{\nouppercase{\rightmark}}
+% \fancyhead[LE]{\nouppercase{\leftmark}}
+\fancyhead[CE]{}
+\fancyhead[RE]{\thepage}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0.3pt}
+\renewcommand{\footrulewidth}{0pt}
+\setlength{\headheight}{13.6pt}
+
+%-----------------------------------------------------------------
+%	MATHS AND SCIENCE
+%-----------------------------------------------------------------
+\usepackage{amsmath,amsfonts,amsthm,amssymb}
+\usepackage{xfrac}
+\usepackage[a]{esvect}
+\usepackage{chemformula}
+\usepackage{graphicx}
+	\graphicspath{{images/}}
+
+\usepackage[arrowdel]{physics}
+	\renewcommand{\vnabla}{\vec{\nabla}}
+	% \renewcommand{\vectorbold}[1]{\boldsymbol{#1}}
+	% \renewcommand{\vectorarrow}[1]{\vec{\boldsymbol{#1}}}
+	% \renewcommand{\vectorunit}[1]{\hat{\boldsymbol{#1}}}
+	\renewcommand{\vectorarrow}[1]{\vec{#1}}
+	\renewcommand{\vectorunit}[1]{\hat{#1}}
+	\renewcommand*{\grad}[1]{\vnabla #1}
+	\renewcommand*{\div}[1]{\vnabla \vdot \va{#1}}
+	\renewcommand*{\curl}[1]{\vnabla \cp \va{#1}}
+	\let\rot\curl
+
+% SI units
+\usepackage[separate-uncertainty=true]{siunitx}
+% \sisetup{range-phrase = \text{--}, range-units = brackets}
+\sisetup{range-phrase = \text{--}, range-units = single}
+\DeclareSIPrePower\quartic{4}
+	%\DeclareSIUnit\micron{\micro\metre}
+
+% Smaller trig functions
+\newcommand{\Sin}{\trigbraces{\operatorname{s}}}
+\newcommand{\Cos}{\trigbraces{\operatorname{c}}}
+\newcommand{\Tan}{\trigbraces{\operatorname{t}}}
+
+% Operator-style notation for matrices
+\newcommand*{\mat}[1]{\hat{#1}}
+
+% Matrices in (A|B) form via [c|c] option
+\makeatletter
+\renewcommand*\env@matrix[1][*\c@MaxMatrixCols c]{%
+  \hskip -\arraycolsep
+  \let\@ifnextchar\new@ifnextchar
+  \array{#1}}
+\makeatother
+
+% Shorter \mathcal and \mathbb
+\newcommand*{\mc}[1]{\mathcal{#1}}
+\newcommand*{\mbb}[1]{\mathbb{#1}}
+
+% Shorter ^\ast and ^\dagger
+\newcommand*{\sast}{^{\star}{}}
+\newcommand*{\sdag}{^{\dagger}{}}
+
+% Blackboard bold identity
+\usepackage{bbm}
+\newcommand*{\bbid}{\mathbbm{1}}
+
+% Shorter displaystyle
+\newcommand*{\dsp}{\displaystyle}
+
+% Inexact differential
+\newcommand{\dbar}{\mathchar'26\mkern-12mu\mathrm{d}}
+\newcommand{\indd}[1]{\dbar{#1}}
+
+% Arrows with text and cancels for developments
+\newcommand{\tikzmark}[1]{\tikz[overlay,remember picture] \node (#1) {};}
+\tikzset{square arrow/.style={to path={-- ++(0,-.25) -| (\tikztotarget)}}}
+\usepackage{cancel}
+
+\newcommand*\acr[1]{\textscale{.85}{#1}}
+
+%-----------------------------------------------------------------
+%	OTHER PACKAGES
+%-----------------------------------------------------------------
+\usepackage{environ}
+
+%Left numbered equations
+\makeatletter
+	\NewEnviron{Lalign}{\tagsleft@true\begin{align}\BODY\end{align}}
+\makeatother
+
+% Plots and graphics
+\usepackage{pgfplots}
+\usepackage{tikz}
+\usepackage{color}
+	\makeatletter
+		\color{black}
+		\let\default@color\current@color
+	\makeatother
+
+% Richer enumerate, figure, and table support
+\usepackage{enumerate}
+\usepackage[shortlabels]{enumitem}
+\usepackage{float}
+\usepackage{tabularx}
+\usepackage{booktabs}
+	%\setlength{\intextsep}{8pt}
+% \numberwithin{equation}{section}
+% \numberwithin{figure}{section}
+% \numberwithin{table}{section}
+% \counterwithin{lstlisting}{section}
+
+% No indentation after certain environments
+\makeatletter
+\newcommand*\NoIndentAfterEnv[1]{%
+	\AfterEndEnvironment{#1}{\par\@afterindentfalse\@afterheading}}
+\makeatother
+%\NoIndentAfterEnv{thm}
+\NoIndentAfterEnv{defi}
+\NoIndentAfterEnv{example}
+\NoIndentAfterEnv{table}
+
+% Misc packages
+\usepackage{ccicons}
+\usepackage{lipsum}
+\usepackage{todonotes}
+\usepackage{array}
+\usepackage{multirow}
+
+% Print DOI only if there's no URL
+\renewbibmacro*{doi+eprint+url}{%
+  \iftoggle{bbx:doi}
+    {\iffieldundef{url}{\printfield{doi}}{}}
+    {}%
+  \newunit\newblock
+  \iftoggle{bbx:eprint}
+    {\usebibmacro{eprint}}
+    {}%
+  \newunit\newblock
+  \iftoggle{bbx:url}
+    {\usebibmacro{url+urldate}}
+    {}}
+
+%-----------------------------------------------------------------
+%	SYNTAX HIGHLIGHTING
+%-----------------------------------------------------------------
+\usepackage[formats]{listings}
+\usepackage{relsize}
+\usepackage{chngcntr}
+
+\renewcommand{\lstlistingname}{Snippet}
+\renewcommand{\lstlistlistingname}{List of snippets}
+
+\lstloadlanguages{python,bash}
+\lstdefinelanguage{Renhanced}[]{R}{%
+	morekeywords={acf,ar,arima,arima.sim,colMeans,colSums,is.na,is.null,%
+	mapply,ms,na.rm,nlmin,replicate,row.names,rowMeans,rowSums,seasonal,%
+	sys.time,system.time,ts.plot,which.max,which.min,%
+	rename,mutate,unite,select,filter,left_join,group_by,dplyr::select,%
+	ggplot,aes,geom_line,geom_hline,geom_point,geom_path,geom_errorbar,%
+	geom_abline,geom_smooth%
+	geom_cartogram,coord_proj,scale_x_longitude, scale_y_latitude,%
+	labs,guides,annotate,theme,rowwise,%
+	scale_linetype_manual,scale_colour_manual,scale_x_log10,scale_y_log10,%
+	attr,paste,paste0,bind_rows,str_trim,as.numeric,as.dataframe,data.frame},
+	deletekeywords={c,range,step},
+	alsoletter={.,_,::},
+	otherkeywords = {!,!=,~,\$,*,\&,\%/\%,\%*\%,\%\%,\%>\%,<-,<<-,\% in \%}
+	}
+
+\newcommand*{\inline}{\lstinline[basicstyle=\normalsize\ttfamily]}
+
+
+\lstset{language=python,
+		frame=tb,
+		% captionpos=b,
+		tabsize=2,
+		% showtabs=true,
+		breaklines=true,
+		breakatwhitespace=true,
+		basicstyle=\smaller\ttfamily,
+		numbers=left,
+		numberstyle=\tiny,
+		numbersep=7.5pt,
+		% commentstyle=\textsl,
+		xleftmargin=3ex}
+\lstset{escapeinside={(*}{*)}}   % for (*\ref{ }*) inside lstlistings (Scode)
+
+\lstdefinestyle{output}{
+	language=,
+	% showtabs=true,
+	% showspaces=true,
+	numbers=none,
+	frame=tblr,
+	% columns=fullflexible,
+	% backgroundcolor=\color{blue!10},
+	numbers=none,
+	xleftmargin=3ex}
+
+\expandafter\patchcmd\csname \string\lstinline\endcsname{%
+	\leavevmode
+	\bgroup
+}{%
+	\leavevmode
+	\ifmmode\hbox\fi
+	\bgroup
+}{}{%
+	\typeout{Patching of \string\lstinline\space failed!}%
+}
+%% end of patch
+
+%-----------------------------------------------------------------
+%	THEOREMS
+%-----------------------------------------------------------------
+\usepackage{thmtools}
+
+% Theroems layout
+\declaretheoremstyle[
+	spaceabove=6pt, spacebelow=6pt,
+	headfont=\normalfont,
+	notefont=\mdseries, notebraces={(}{)},
+	bodyfont=\small,
+	postheadspace=1em,
+]{small}
+
+\declaretheorem[style=plain,name=Theorem,qed=$\square$,numberwithin=section]{thm}
+\declaretheorem[style=plain,name=Corollary,qed=$\square$,sibling=thm]{cor}
+\declaretheorem[style=plain,name=Lemma,qed=$\square$,sibling=thm]{lem}
+\declaretheorem[style=definition,name=Definition,qed=$\blacksquare$,numberwithin=section]{defi}
+\declaretheorem[style=definition,name=Example,qed=$\blacktriangle$,numberwithin=section]{example}
+\declaretheorem[style=small,name=Proof,numbered=no,qed=$\square$]{sproof}
+
+%-----------------------------------------------------------------
+%	ELA MOTHERFUCKING GEMINADA
+%-----------------------------------------------------------------
+\def\xgem{%
+	\ifmmode
+		\csname normal@char\string"\endcsname l%
+	\else
+		\leftllkern=0pt\rightllkern=0pt\raiselldim=0pt
+		\setbox0\hbox{l}\setbox1\hbox{l\/}\setbox2\hbox{.}%
+		\advance\raiselldim by \the\fontdimen5\the\font
+		\advance\raiselldim by -\ht2
+		\leftllkern=-.25\wd0%
+		\advance\leftllkern by \wd1
+		\advance\leftllkern by -\wd0
+		\rightllkern=-.25\wd0%
+		\advance\rightllkern by -\wd1
+		\advance\rightllkern by \wd0
+		\allowhyphens\discretionary{-}{}%
+		{\kern\leftllkern\raise\raiselldim\hbox{.}%
+			\kern\rightllkern}\allowhyphens
+	\fi
+}
+\def\Xgem{%
+	\ifmmode
+		\csname normal@char\string"\endcsname L%
+	\else
+		\leftllkern=0pt\rightllkern=0pt\raiselldim=0pt
+		\setbox0\hbox{L}\setbox1\hbox{L\/}\setbox2\hbox{.}%
+		\advance\raiselldim by .5\ht0
+		\advance\raiselldim by -.5\ht2
+		\leftllkern=-.125\wd0%
+		\advance\leftllkern by \wd1
+		\advance\leftllkern by -\wd0
+		\rightllkern=-\wd0%
+		\divide\rightllkern by 6
+		\advance\rightllkern by -\wd1
+		\advance\rightllkern by \wd0
+		\allowhyphens\discretionary{-}{}%
+		{\kern\leftllkern\raise\raiselldim\hbox{.}%
+			\kern\rightllkern}\allowhyphens
+	\fi
+}
+
+\expandafter\let\expandafter\saveperiodcentered
+	\csname T1\string\textperiodcentered \endcsname
+
+\DeclareTextCommand{\textperiodcentered}{T1}[1]{%
+	\ifnum\spacefactor=998
+		\Xgem
+	\else
+		\xgem
+	\fi#1}
+
+%-----------------------------------------------------------------
+%	DEDICATION ENVIRONMENT
+%-----------------------------------------------------------------
+
+\newenvironment{mydedication}
+	{\clearpage           % we want a new page
+	\thispagestyle{empty}% no header and footer
+	\vspace*{\stretch{1}}% some space at the top
+	\itshape             % the text is in italics
+	\raggedleft          % flush to the right margin
+	}
+	{\par % end the paragraph
+	\vspace{\stretch{3}} % space at bottom is three times that at the top
+	\clearpage           % finish off the page
+	}
+
+%-----------------------------------------------------------------
+%	PDF INFO AND HYPERREF
+%-----------------------------------------------------------------
+\usepackage{hyperref}
+\hypersetup{colorlinks, citecolor=black, filecolor=black, linkcolor=black, urlcolor=black}
+\usepackage{cleveref}
+	\crefname{section}{\S}{\SS}
+	\Crefname{section}{\S}{\SS}
+	\crefname{listing}{snippet}{}
+
+\newcommand*{\mytitle}{N Queens Problem}
+\newcommand*{\mysubtitle}{An implementation using Genetic Algorithms and Python}
+\newcommand*{\myauthor}{Alfredo Hernández}
+% \newcommand*{\mysupervisor}{J. Minguillón}
+% \newcommand*{\mytutor}{}
+\newcommand*{\myuni}{Universitat Autònoma de Barcelona}
+\newcommand*{\mydate}{30th November 2017}
+% \newcommand*{\mydate}{10th December} # Deadline
+
+\pdfstringdefDisableCommands{\def\and{and }}
+
+\usepackage{hyperxmp}
+\hypersetup{pdfauthor={\myauthor}, pdftitle={\mytitle: \mysubtitle}}
+
+%-----------------------------------------------------------------
+%	TITLE SECTION AND DOCUMENT BEGINNING
+%-----------------------------------------------------------------
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}}
+\title{
+	\normalfont
+	\small \scshape{\myuni} \\ [25pt]
+	\horrule{0.5pt} \\ [0.4cm]
+	\huge \mytitle \\
+	\Large \scshape{\mysubtitle} \\
+	\horrule{2pt} \\ [0.5cm]
+}
+\author{\myauthor }
+% \\ \footnotesize Supervised by: \mysupervisor \\ \footnotesize Academic tutor: \mytutor}
+\date{\mydate}
+
+\begin{document}
+
+\clearpage\maketitle
+\thispagestyle{empty}
+\addtocounter{page}{-1}
+
+%-----------------------------------------------------------------
+%	DEDICATION
+%-----------------------------------------------------------------
+% \begin{mydedication}
+% 	Dedicated to RMT, Val \& the Brotherhood
+% \end{mydedication}
+
+%-----------------------------------------------------------------
+%	DOCUMENT BODY
+%-----------------------------------------------------------------
+\cleardoubleevenemptypage
+% \include{./contents/0-abstract}
+
+\pdfbookmark[1]{\contentsname}{toc}
+\tableofcontents
+
+\include{./contents/1-problem}
+\include{./contents/2-implementation}
+\include{./contents/3-results}
+
+%-----------------------------------------------------------------
+%	BIBLIOGRAPHY
+%-----------------------------------------------------------------
+
+% \nocite{Pearl1984}
+% \nocite{Sean2010}
+% \nocite{Gendreau2010}
+% \nocite{Michalewicz2000}
+% \nocite{Goldberg1989}
+% \nocite{Zapfel2010}
+
+\printbibliography[heading=bibintoc]
+% \setcounter{secnumdepth}{0}
+% \section{References}
+% \printbibliography[title={Articles}, type=article, heading=subbibliography]
+% \printbibliography[title={Books}, type=book, heading=subbibliography]
+% \printbibliography[title={Websites}, type=online , heading=subbibliography]
+% \printbibliography[title={Basic}, keyword=basic , heading=subbibliography]
+
+\end{document}

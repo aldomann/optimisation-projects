@@ -1,0 +1,513 @@
+%-----------------------------------------------------------------
+%	STATISTICAL ANALYSIS
+%	!TEX root = ./../main.tex
+%-----------------------------------------------------------------
+\section{Implementation of the Program}\label{sec:implementation}
+
+An efficient approach to the problem (similar to what happens in GPS industry) is to write two programs:
+\begin{itemize}
+	\item \inline{write_bin.c}: reads the \inline{.csv} files and computes the graph with binary search and stores the graphs in a binary file with arrows between nodes already determined. This file is thus very quick to read. This processes will be discussed in \cref{sec:w_bin}
+	\item \inline{a-star.c}: a second program that reads this formatted binary file (getting the map already in graph form), asks for the start and goal nodes, and then performs the A* Algorithm.
+\end{itemize}
+
+%-----------------------------------------------------------------
+\subsection{Data Preprocessing}
+Unfortunately, the file is not consistently formatted. There are ways with less than two nodes (that have to be discarded) and there are nodes in ways that do not appear in the list of nodes. For this reason, to ease the process of creating a binary file, we have decided to preprocess the raw \inline{spain.csv} file using AWK.
+
+First thing we do is to is to understand the structure of the \inline{.csv} file. There are three kind of records: \inline{node}, \inline{way}, and \inline{relation}. Since we want to build a graph connecting nodes, we only care about nodes and ways. In particular, we are interested in the following fields:
+\begin{itemize}
+	\item \inline{$1}: record type (node or way).
+    \item \inline{$2}: \inline{@id} of the node or way.
+    \item \inline{$3}: \inline{@name} of the node or way.
+\end{itemize}
+
+For nodes we have the following exclusive fields:
+\begin{itemize}
+    \item \inline{$10}: latitude of the node.
+    \item \inline{$11}: longitude of the node.
+\end{itemize}
+
+Whilst for ways we have the following exclusive fields:
+\begin{itemize}
+    \item \inline{$8}: \inline{@oneway}, a boolean indicating if the way is unidirectional.
+    \item \inline{$10}--EOL: member nodes connected by the way.
+\end{itemize}
+
+\bigskip
+Having this in mind, we first use AWK to create a file containing only the nodes, whilst keeping the \inline{|} separator:
+\begin{script}[language=awk, caption={\inline{get_nodes.awk}}]
+BEGIN{
+	FS = "|"
+	OFS = "|"
+}
+FNR > 3 {
+	if ($1 == "node") {
+		print $1, $2, $3, $10, $11
+	}
+}
+\end{script}
+
+For the ways we create a similar AWK program, with the difference that we already make sure that the ways have more than one member node (\inline{if (NF >= 11)}), so we have to resort to use \inline{printf} instead of the standard \inline{print}:
+\begin{script}[language=awk, caption={\inline{get_ways.awk}}]
+BEGIN{
+	FS = "|"
+}
+FNR > 3 {
+	if ($1 == "way" && NF >= 11) {
+		printf("%s|%s|%s", $1, $2, $8);
+		for (i=10; i<=NF; ++i) printf("|%s", $i);
+		printf("\n")
+	}
+}
+\end{script}
+
+To use the AWK programs we just need to execute them in the following way:
+\begin{lstlisting}[language=bash]
+awk -f get_nodes.awk data/spain.csv > data/spain-nodes.csv
+awk -f get_ways.awk data/spain.csv > data/spain-ways.csv
+\end{lstlisting}
+
+%-----------------------------------------------------------------
+\subsection{Creating a Binary File}\label{sec:w_bin}
+
+\subsubsection*{Structure of the data}
+To store the data into a binary graph format, we need to use structures (or structs). A struct in the C programming language is a composite data type declaration that defines a physically grouped list of variables to be placed under one name in a block of memory, allowing the different variables to be accessed via a single pointer. Thus, it has the role that a class would have (although they can do much more than a struct) in object-oriented programming languages.
+
+We will define the \inline{Node} struct to store the variables contained in each of the nodes:
+\begin{lstlisting}
+typedef struct {
+	unsigned long id;              // Node identification
+	unsigned short name_lenght;
+	char *name;
+	double lat, lon;               // Node position
+	unsigned short num_successors; // Node successors: wighted edges
+	unsigned long *successors;
+} Node;
+\end{lstlisting}
+
+Since the nodes' \inline{id}s do not follow a structured pattern, it is recommended to store the nodes in an array of node structures and refer to the nodes internally in the program by the index in this vector (not by the \inline{id}). This is way of naming nodes allows a quicker way of finding them.
+
+This \inline{nodes} array is defined in the following way:
+\begin{lstlisting}
+Node *nodes;
+unsigned long nnodes = 23895681UL;
+nodes = (Node *) malloc(nnodes*sizeof(Node));
+\end{lstlisting}
+
+An array for storing the \inline{ways} is initialized in a similar fashion:
+\begin{lstlisting}
+unsigned long *ways;
+ways = (unsigned long *)malloc(sizeof(unsigned long) * 5306);
+\end{lstlisting}
+
+%----------------------
+\subsubsection*{Reading the \inline{.csv} Files}
+Basically this process consists on reading the two preprocessed files we built with AWK:
+\begin{itemize}
+	\item A file containing all the nodes (\inline{spain-nodes.csv}).
+    \item A file containing all the ways (\inline{spain-ways.csv}).
+\end{itemize}
+
+For these operations we will work with a \inline{FILE *file} variable which is dynamically opened and closed, and with the \inline{str*} functions (from the \inline{string.h} library) to work with tokens.
+
+The process of reading the nodes can be seen in the snippet below:
+\begin{lstlisting}
+file = fopen("data/spain-nodes.csv", "r");
+
+while((bytes_read = getline(&buffer, &bufsize, file)) != -1) {
+	field = strsep(&buffer, "|");
+	field = strsep(&buffer, "|");
+	if((nodes[i].id = strtoul(field, '\0', 10)) == 0) printf("ERROR: Conversion failed.\n");
+	field = strsep(&buffer, "|");
+	nodes[i].name_lenght = strlen(field) + 1;
+	nodes[i].name = (char *) malloc(nodes[i].name_lenght*sizeof(char));
+	strcpy(nodes[i].name, field);
+	field = strsep(&buffer, "|");
+	nodes[i].lat = atof(field);
+	field = strsep(&buffer, "|");
+	nodes[i].lon = atof(field);
+	i++;
+}
+\end{lstlisting}
+
+The process of reading the ways and getting the successors of each node can be seen in the snippet below. Notice that we use the \inline{perform_binary_search()} function to check if a node is present in the list of member nodes of each way.
+\begin{lstlisting}
+file = fopen("data/spain-ways.csv", "r");
+
+unsigned long a, b, A, B, member, way_lenght, index;
+bool oneway;
+
+for (i = 0; i < nnodes; i++) {
+	if((nodes[i].successors = (unsigned long *)malloc(sizeof(unsigned long)*16)) == NULL) {
+		printf("Memory allocation for the successors failed at node %lu\n", i);
+		break;
+	}
+}
+
+i = 0;
+while((bytes_read = getline(&buffer, &bufsize, file)) != -1) {
+	i++;
+	field = strsep(&buffer, "|");
+	field = strsep(&buffer, "|");
+	field = strsep(&buffer, "|");
+	if (strlen(field)>0) {
+		oneway = 1;
+	} else {
+		oneway = 0;
+	}
+
+	while((field = strsep(&buffer, "|")) != NULL) {
+		member = strtoul(field, '\0', 10);
+		if((index = perform_binary_search(member, nodes, nnodes)) != ULONG_MAX) {
+				ways[n] = member;
+				n++;
+		}
+	}
+	way_lenght = n;
+	n = 0;
+
+	for (j = 0; j < way_lenght - 1; j++) {
+		A = ways[j];
+		a = perform_binary_search(A, nodes, nnodes);
+		B = ways[j + 1];
+		b = perform_binary_search(B, nodes, nnodes);
+
+		nodes[a].successors[nodes[a].num_successors] = b;
+		nodes[a].num_successors++;
+
+		if(oneway == 0) {
+			nodes[b].successors[nodes[b].num_successors] = a;
+			nodes[b].num_successors++;
+		}
+	}
+}
+\end{lstlisting}
+
+%----------------------
+\subsubsection*{Binary Search}
+Binary search is a search algorithm that finds the position of a target value within a sorted array. Binary search compares the target value to the middle element of the array; if they are unequal, the half in which the target cannot lie is eliminated and the search continues on the remaining half until it is successful. If the search ends with the remaining half being empty, the target is not in the array.
+
+The main reason to use this algorithm is that it runs at worst (and in average) in logarithmic time, specifically it is $\order{\log_{2} (n) }$, being a much faster algorithm that a Sequential Search.
+
+For this purpose, we have developed the following \inline{perform_binary_search()} function:
+\begin{lstlisting}
+unsigned long perform_binary_search (unsigned long key, unsigned long *list, unsigned long lenlist) {
+	register unsigned long start = 0UL, afterend = lenlist, middle;
+	register unsigned long try;
+	while ( afterend > start ) {
+		middle = start + ((afterend-start-1)>>1); try = list[middle];
+		if (key == try) {
+			return middle;
+		} else if ( key > try ) {
+			start = middle + 1;
+		} else {
+			afterend = middle;
+		}
+	}
+	return ULONG_MAX;
+}
+\end{lstlisting}
+
+%----------------------
+\subsubsection*{Storing into a Binary File}
+This process is strongly based on the methods provided by Prof. Lluís Alsedà in~\cite{AlsedaRWBin}. In short, we write the following data into the \inline{spain-data.bin} binary file:
+\begin{enumerate}[(i)]
+	\item A header specifying the number of nodes, the total number of successors, and the total number of characters.
+    \item An array containing all the nodes (including their internal \inline{Node} structure).
+    \item An array containing all the successors.
+    \item An array containing all the names.
+\end{enumerate}
+
+These processes can be seen in the snippet below:
+\begin{lstlisting}
+const char filename[] = "data/spain-data.bin";
+
+unsigned long num_total_successors = 0UL;
+for (i = 0; i < nnodes; i++) {
+	num_total_successors += nodes[i].num_successors;
+}
+
+unsigned long num_total_name = 0UL;
+for (i = 0; i < nnodes; i++) {
+	num_total_name += nodes[i].name_lenght;
+}
+printf("Starting to write the bin file.\n");
+
+if ((file = fopen (filename, "wb")) == NULL) printf("The output binary data file cannot be opened.\n");
+
+// Global data --- header
+if( fwrite(&nnodes, sizeof(unsigned long), 1, file) +
+fwrite(&num_total_successors, sizeof(unsigned long), 1, file) +
+fwrite(&num_total_name, sizeof(unsigned long), 1, file)!= 3 ) {
+	printf("Error when initializing the output binary data file.\n");
+}
+
+// Writing all nodes
+if( fwrite(nodes, sizeof(Node), nnodes, file) != nnodes ) {
+	printf("Error when writing nodes to the output binary data file.\n");
+}
+
+// Writing sucessors in blocks
+for (i = 0; i < nnodes; i++) {
+	if (nodes[i].num_successors) {
+		if (fwrite(nodes[i].successors, sizeof(unsigned long), nodes[i].num_successors, file) != nodes[i].num_successors) {
+			printf("Error when writing edges to the output binary data file.\n");
+		}
+	}
+}
+
+// Writing names in blocks
+for (i = 0; i < nnodes; i++) {
+	if (nodes[i].name_lenght) {
+		if (fwrite(nodes[i].name, sizeof(char), nodes[i].name_lenght, file) != nodes[i].name_lenght) {
+			printf("Error when writing names to the output binary data file.\n");
+		}
+	}
+}
+
+fclose(file);
+\end{lstlisting}
+
+%-----------------------------------------------------------------
+\newpage
+\subsection{Reading a Binary File}
+This process is also based on the methods provided by Prof. Lluís Alsedà in~\cite{AlsedaRWBin}, and is the \emph{inverse} operation of storing the graph into the binary file. In short the process consists on:
+\begin{enumerate}[(i)]
+	\item Initializing the \inline{file_in} file variable.
+    \item Opening the \inline{spain-data.bin} file using \inline{fopen} with reading permissions.
+    \item Reading the header of the binary, this is needed to allocate the memory.
+    \item Allocating the memory needed for the variables.
+    \item Actually reading the data and storing into the variables defined before.
+    \item Once everything has been read without issues, closing the \inline{file_in} file.
+\end{enumerate}
+
+These processes can be seen in the snippet below:
+\begin{lstlisting}
+FILE *file_in;
+
+if ((file_in = fopen ("data/spain-data.bin", "r")) == NULL) {
+	printf("The data file does not exist or cannot be opened\n");
+}
+
+/* Global data --- header */
+if ( fread(&nnodes, sizeof(unsigned long), 1, file_in) +
+fread(&num_total_successors, sizeof(unsigned long), 1, file_in) +
+fread(&num_total_name, sizeof(unsigned long), 1, file_in) != 3 ) {
+	printf("Error when reading the header of the binary data file\n");
+}
+
+/* getting memory for all data */
+if ((nodes = (Node *) malloc(nnodes*sizeof(Node))) == NULL) {
+	printf("Error when allocating memory for the nodes vector\n");
+}
+if ((allsuccessors = (unsigned long *) malloc(num_total_successors*sizeof(unsigned long))) == NULL) {
+	printf("Error when allocating memory for the edges vector\n");
+}
+if ((allnames = (char *) malloc(num_total_name*sizeof(char))) == NULL) {
+	printf("Error when allocating memory for the names\n");
+}
+
+/* Reading all data from file */
+if ( fread(nodes, sizeof(Node), nnodes, file_in) != nnodes ) {
+	printf("Error when reading nodes from the binary data file\n");
+}
+if ( fread(allsuccessors, sizeof(unsigned long), num_total_successors, file_in) != num_total_successors ) {
+	printf("Error when reading sucessors from the binary data file\n");
+}
+if ( fread(allnames, sizeof(char), num_total_name, file_in) != num_total_name ) {
+	printf("Error when reading names from the binary data file\n");
+}
+fclose(file_in);
+\end{lstlisting}
+
+After reading this, we need to input the \inline{allsuccessors} and \inline{allnames} arrays into the \inline{nodes[i].successors} and \inline{nodes[i].name} variables of the \inline{Node} struct:
+\begin{lstlisting}
+//Setting pointers to successors
+for (i = 0; i < nnodes; i++) {
+	if (nodes[i].num_successors) {
+		nodes[i].successors = allsuccessors;
+		allsuccessors += nodes[i].num_successors;
+	}
+}
+
+//Setting pointers to names
+for (i = 0; i < nnodes; i++) {
+	if (nodes[i].name_lenght) {
+		nodes[i].name = allnames;
+		allnames += nodes[i].name_lenght;
+	}
+}
+\end{lstlisting}
+
+%-----------------------------------------------------------------
+\subsection{Heuristic Cost Function}
+For the heuristic cost function $h(n)$ we have decided to use the Haversine distance formula.
+
+The haversine formula determines the great-circle distance between two points on a sphere given their longitudes and latitudes. Important in navigation, it is a special case of a more general formula in spherical trigonometry, the law of haversines, that relates the sides and angles of spherical triangles.
+
+\begin{align}
+    a &= \sin[2](\frac{\Delta \varphi}{2}) + \cos (\varphi_1) \cdot \cos(\varphi_2) \cdot \sin[2](\frac{\Delta \lambda}{2})\notag \\
+    c &= 2 \cdot \operatorname{atan2}\qty(\sqrt{a}, \sqrt{1-a}) \notag \\
+    d &=  R \cdot c
+\end{align}
+
+where $\varphi$ is latitude, $\lambda$ is longitude, and $R$ is the mean radius of the Earth ($R = \SI{6371}{\km}$), and $h(n) = d$ is the distance between the two points (along a great circle of the sphere). The function $\operatorname{atan2}(x,y)$ returns the principal value of the arc tangent of $y/x$.
+
+It is crucial to have in mind, this formula supposes the Earth as spherical, fact that in our range of
+distances is a very good approach, and does not account for irregularities in the surface
+
+\bigskip
+This heuristic has been implemented in the \inline{distance()} function below:
+\begin{lstlisting}
+double distance (Node *nodes, unsigned long node_start, unsigned long node_goal) {
+	double R = 6371000;
+	double lat1 = nodes[node_start].lat * (M_PI/180);
+	double lat2 = nodes[node_goal].lat * (M_PI/180);
+	double lon1 = nodes[node_start].lon * (M_PI/180);
+	double lon2 = nodes[node_goal].lon * (M_PI/180);
+	double delta_lat = lat2 - lat1;
+	double delta_lon = lon2 - lon1;
+	double a = sin(delta_lat/2) * sin(delta_lat/2) + cos(lat1) * cos(lat2) * sin(delta_lon/2) * sin(delta_lon/2);
+	double c = 2 * atan2(sqrt(a), sqrt(1-a));
+	return R * c;
+}
+\end{lstlisting}
+
+%-----------------------------------------------------------------
+\subsection{Dealing with the Queue}
+As stated in \cref{sec:astar-pseudo}, we need to deal with a queue to track the status of each of the nodes. For this we use the \inline{AStarStatus} struct and a \inline{whichQueue} enumerated type:
+\begin{lstlisting}
+typedef char Queue;
+enum whichQueue { NONE, OPEN, CLOSED };
+
+typedef struct {
+	double g_cost, h_cost;
+	unsigned long parent;
+	Queue queue_status;
+} AStarStatus;
+\end{lstlisting}
+
+In the \inline{main} algorithm the \inline{AStarStatus} is used to define the \inline{status} variable, with which we can easily update the values of $g(n)$, $h(n)$, and the status of the node in the queue:
+\begin{lstlisting}
+AStarStatus *status;
+status = (AStarStatus *)malloc(sizeof(AStarStatus)*nnodes);
+
+status[node_start].g_cost = 0;
+status[node_start].h_cost = distance(nodes, node_start, node_goal);
+status[node_start].queue_status = OPEN;
+\end{lstlisting}
+
+To deal with the \inline{OPEN} list, we used a linked list. A linked list is a data structure that consists of sequence of nodes. Each node is composed of two fields: data field and reference field which is a pointer that points to the next node in the sequence. This allows us to work with a dynamical \inline{Node} structure:
+\begin{lstlisting}
+typedef struct Node {
+	double f_cost;
+	unsigned long index;
+	struct Node *next;
+} DynamicNode;
+\end{lstlisting}
+
+To dynamically change the \inline{OPEN} list we need to define the following functions: (i) \inline{append()} to add items, (ii) \inline{pop_first()} and \inline{pop_by_index()} to remove items, and (iii) \inline{index_minimum()} to find the item with with the minimum $f(n)$ (or \inline{f_cost}) and return its index.
+\nocite{CLinkedList}
+
+%-----------------------------------------------------------------
+\subsection{The A* Algorithm}
+
+Our implementation of the A* Algorithm as a function is nothing more than a fully-fledged version of Algorithm~\ref{sn:astar-pseudo}: it uses the \inline{Node} struct to define the nodes, the \inline{DynamicNode} struct and its linked list functions for the \inline{OPEN} list, the \inline{AStarStatus} to track the status of the Queue, the Haversine \inline{distance()}, and last but not least the starting and goal nodes.
+
+The \inline{astar_algorithm()} function can be seen below:
+
+\begin{lstlisting}
+inline void astar_algorithm (Node *nodes, DynamicNode *open_list, AStarStatus *status, unsigned long node_start, unsigned long node_goal, unsigned long nnodes ) {
+	double successor_current_cost;
+	unsigned long node_current;
+
+	int i = 0;
+	while ((node_current = index_minimum(open_list)) != ULONG_MAX) {
+
+		if (node_current == node_goal) {
+			break;
+		}
+
+		for (i = 0; i < nodes[node_current].num_successors; i++) {
+			unsigned long node_successor = nodes[node_current].successors[i];
+			successor_current_cost = status[node_current].g_cost + distance(nodes, node_current, node_successor);
+
+			if (status[node_successor].queue_status == OPEN) {
+				if (status[node_successor].g_cost <= successor_current_cost){
+					continue;
+				}
+			} else if (status[node_successor].queue_status == CLOSED) {
+				if (status[node_successor].g_cost <= successor_current_cost) continue;
+
+				status[node_successor].queue_status = OPEN;
+				append(&open_list, successor_current_cost + status[node_successor].h_cost, node_successor);
+			} else {
+				status[node_successor].queue_status = OPEN;
+				status[node_successor].h_cost = distance(nodes, node_successor, node_goal);
+				append(&open_list, (successor_current_cost + status[node_successor].h_cost), node_successor);
+			}
+
+			status[node_successor].g_cost = successor_current_cost;
+			status[node_successor].parent = node_current;
+		}
+		status[node_current].queue_status = CLOSED;
+
+		if ((pop_by_index(&open_list, node_current)) != 1) {
+			printf("Removal failed.\n");
+		}
+	}
+	if (node_current != node_goal) {
+		printf("OPEN list is empty.\n");
+	}
+
+	print_path(nodes, status, node_start, node_goal, node_current, nnodes);
+}
+\end{lstlisting}
+
+To print the paths in a readable \inline{.csv} format, we defined the function \inline{print_path()} as follows:
+\begin{lstlisting}
+inline void print_path (Node *nodes, AStarStatus *status, unsigned long node_start, unsigned long node_goal, unsigned long node_current, unsigned long nnodes) {
+	// Print the path
+
+unsigned long *path;
+	unsigned long node_next;
+	int i = 0;
+
+	node_next = node_current;
+	path = (unsigned long *)malloc(nnodes*sizeof(unsigned long));
+	path[0] = node_next;
+	while (node_next != node_start) {
+		i++;
+		node_next = status[node_next].parent;
+		path[i] = node_next;
+	}
+	int path_length = i + 1;
+
+	// Header
+	printf("Node ID, Distance (m), Lat, Lon\n");
+	// Print nodes
+	for (i = path_length-1; i >= 0;i--) {
+		printf("%lu, %.2f, %.5f, %.5f \n", nodes[path[i]].id, status[path[i]].g_cost, nodes[path[i]].lat, nodes[path[i]].lon);
+	}
+}
+\end{lstlisting}
+
+We will use the resulting \inline{solution.csv} file to plot the solution into a illustrative map using the R script \inline{create_maps.R}.
+
+%-----------------------------------------------------------------
+\subsection{Compiling and Running the Program}
+Since some of the functions for the A* Algorithm have been defined in a separate \inline{functions.c}, we need to include it in the compilation process with GCC. Compiling it using the \inline{-Ofast} flag we get a quite faster compiled binary (nonetheless, in \cref{sec:res} we will include the times for the base run and the version with \inline{Ofast}). 
+
+To compile and run the program that writes the binary file, we use:
+\begin{lstlisting}
+gcc -lm -Ofast write_bin.c -o write_bin
+./write_bin
+\end{lstlisting}
+
+To compile and run the A* Algorithm, we use:
+\begin{lstlisting}
+gcc -lm -Ofast functions.c a-star.c -o astar
+./astar
+\end{lstlisting}
+
+Notice that the programs are executed in a quite powerful machine, but without an Solid State Disk. Therefore, a clear bottleneck will be the reading and writing speed of the Hard Drive Disk.

@@ -1,0 +1,15 @@
+%-----------------------------------------------------------------
+%	INTRODUCTION
+%	!TEX root = ./../main.tex
+%-----------------------------------------------------------------
+\section{Introduction}
+
+Finding shortest paths or optimal paths is a classic problem in graph theory that has been widely studied. It has enormous applications in many areas including computer science, operations research, transportation engineering, network routing network analysis, and specifically in vehicle routing. The use of Global Positioning System (GPS) and Google Maps has rapidly increased in recent days; finding the shortest path from one place to another place has become an ordinary daily task in modern society.
+
+Several studies about shortest path search show the feasibility of using graphs for the purposes explained before. Dijkstra's Algorithm is one of the classic shortest path search algorithms. This algorithm is not well suited for shortest path search in large graphs. This is the reason why various modifications to Dijkstra's Algorithm have been proposed by several authors using heuristics to reduce the run time of shortest path search. One of the most used heuristic algorithms is the A* Algorithm, with the main goal of reducing the run time by reducing the search space.
+
+This report shows the use of A* Algorithm in computing an optimal path from Basílica Santa Maria del Mar in Barcelona to the Giralda (Calle Mateos Gago) in Sevilla implemented in the C language. The A* Algorithm will be implemented as a function that will give the optimal path.
+
+
+
+% As the reference starting node for Basílica de Santa Maria del Mar (Plaça de Santa Maria) in Barcelona we will take the node with key (\inline{@id}): \inline{240949599} while the goal node close to Giralda (Calle Mateos Gago) in Sevilla will be the node with key (\inline{@id}): \inline{195977239}.

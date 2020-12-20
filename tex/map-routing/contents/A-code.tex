@@ -1,0 +1,22 @@
+%-----------------------------------------------------------------
+%	APPENDIX A
+%	!TEX root = ./../main.tex
+%-----------------------------------------------------------------
+\section{Developed code}\label{app:code}
+\renewcommand{\lstlistingname}{Script}
+
+\lstinputlisting[firstline = 1, label = scr:stat,%
+	caption = \inline{statistical-analysis.R} - Code Used for the Statistical Analysis  ]%
+	{code/statistical-analysis.R}
+
+\lstinputlisting[firstline = 1, label = scr:fits,%
+	caption = \inline{find-fits.R} - Code Used to Find the Fit Models for SST and Wind Speed ]%
+	{code/find-fits.R}
+	
+\lstinputlisting[firstline = 1, label = scr:acf-ccf,%
+	caption = \inline{acf-ccf-ts-functions.R} - Code Used to Find the ACF and CCF Functions ]%
+	{code/acf-ccf-ts-functions.R}
+	
+\lstinputlisting[firstline = 1, label = scr:peri,%
+	caption = \inline{periodogram.R} - Code Used to Find Correlations in the Frequency Domain ]%
+	{code/periodogram_ggplot.R}

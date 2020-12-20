@@ -1,0 +1,105 @@
+%-----------------------------------------------------------------
+%	STATISTICAL ANALYSIS
+%	!TEX root = ./../main.tex
+%-----------------------------------------------------------------
+\section{Implementation of the Program}\label{sec:implementation}
+
+\subsection{Preprocessing the Data}
+Since the data provided includes a header, we decided the get rid of it using AWK, and change the format to store it in a \inline{.csv} file:
+\begin{lstlisting}[language=awk]
+BEGIN{
+	FS = " "
+	OFS = ","
+}
+NR > 1 && NF == 2 {
+	print $1, $2
+}
+\end{lstlisting}
+
+We just run it as usual:
+\begin{lstlisting}[language=bash]
+awk -f clean_data.awk KnapsackData.dat > data.csv
+\end{lstlisting}
+
+
+\subsection{Algorithm in Python}
+The algorithm in Python 3.5 is programmed mainly using the NumPy library. 
+
+First of all, we use Pandas to read and process the file with the data:
+\begin{lstlisting}
+data = pd.read_csv('data.dat')
+values = np.array(data["values"])
+weights = np.array(data["weights"])
+num_items = len(data)
+\end{lstlisting}
+
+
+Two important parameters in the algorithm are the total weight and the total value of the items in the truck. For this reason, we have defined the \inline{get_weight()} and \inline{ get_value()} functions:
+\begin{lstlisting}
+def get_weight(individual, weights):
+	return int(np.sum(individual * weights))
+\end{lstlisting}
+
+\begin{lstlisting}
+def get_value(individual, values, weights):
+	total_weight = get_weight(individual, weights)
+	if (total_weight <= 600):
+		total_value = np.sum(individual * values)
+	else:
+		total_value = - pow(total_weight, 100)
+	return int(total_value)
+\end{lstlisting}
+
+Where the \inline{individual} is the array $\va{x}$ array of zeroes and ones used as an indicator of the present items in the truck.
+
+
+We use a simple Monte Carlo method to mutate the elements $x_{i}$ of the individual:
+\begin{lstlisting}
+def random_bool():
+	return np.random.randint(2)
+\end{lstlisting}
+
+
+For the Simulated Annealing we define a function which is just a fully fledged version of the algorithm we described in \cref{sec:sa}:
+\begin{lstlisting}
+def simulated_annealing(individual, MAX_ITER):
+	for iter in range(0, MAX_ITER):
+		# Temperature cooling schedule
+		temp[iter] = MAX_TEMP * 0.5 * (tanh(-log(iter+1) + 10) + 1 )
+
+		# Exploring the neighbourhood
+		individual_new = np.copy(individual)
+		for m in range(0, 5):
+			index = np.random.randint(num_items)
+			individual_new[index] = random_bool()
+
+		# Total value of items inside the truck
+		value_old = get_value(individual, values, weights)
+		value_new = get_value(individual_new, values, weights)
+
+		# Acceptance probabilities
+		if (value_old < value_new):
+			prob[iter] = 1
+		else:
+			prob[iter] = exp(-(value_old - value_new) / temp[iter])
+
+		# Acceptance rule
+		if (float(np.random.random(1)) < prob[iter]):
+			individual = np.copy(individual_new)
+
+		# Update total value and weight
+		sol_values[iter] = get_value(individual, values, weights)
+		sol_weights[iter] = get_weight(individual, weights)
+	return individual
+\end{lstlisting}
+
+To run the algorithm, and store the final solution we just call the function we defined above:
+\begin{lstlisting}
+solution = simulated_annealing(individual, MAX_ITER)
+\end{lstlisting}
+
+\bigskip
+To run the algorithm, we just need to run the following:
+\begin{lstlisting}
+python knapsack_sa.py
+\end{lstlisting}
